@@ -1,13 +1,18 @@
-describe('dian.gov.co page', () => {
-  it('should have the right title', async () => {
-    await browser.url('https://muisca.dian.gov.co/WebArquitectura/DefLogin.faces')
+var assert = require('assert');
 
-    const input = $('#txtUsuario')
+describe('muisca.dian.gov page', () => {
+  it('should get text a menu link', () => {
+    const text = $('#menu');
+    console.log(text.$$('li')[2].$('a').getText()); // outputs: "API"
+  });
 
-    // copies text from an input element
-    input.setValue('1117552597');
-    console.log(await input.getValue());
-
-    await expect(browser).toHaveTitle('Dirección de Impuestos y Aduanas Nacionales - DIAN');
-  })
+  it('should get text a menu link - JS Function', () => {
+    const text = $(function () { // Arrow function is not allowed here.
+      // this is Window https://developer.mozilla.org/en-US/docs/Web/API/Window
+      // TypeScript users may do something like this
+      // return (this as Window).document.querySelector('#menu')
+      return this.document.querySelector('#menu'); // Element
+    });
+    console.log(text.$$('li')[2].$('a').getText()); // outputs: "API"
+  });
 })

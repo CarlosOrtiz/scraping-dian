@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { DianService } from './dian.service';
+import { DianService } from './services/dian.service';
 
 @Controller('dian')
 export class DianController {
