@@ -13,48 +13,44 @@ export class DianService {
         logLevel: 'trace',
         capabilities: {
           browserName: 'chrome'
-        }
+        },
+        waitforTimeout: 50000,
+        //
+        // Default timeout in milliseconds for request
+        // if browser driver or grid doesn't send response
+        connectionRetryTimeout: 120000,
       });
 
       await browser.url('https://muisca.dian.gov.co/WebArquitectura/DefLogin.faces')
 
       const typedUser = await browser.$('select[name="vistaLogin:frmLogin:selNit"]');
-      await typedUser.setValue(2);
+      await typedUser.selectByAttribute('value', '2');
 
-      const typeUser = await browser.$(function () {
-        return document.getElementById('vistaLogin:frmLogin:selNit').value = 1;
-      });
-
-      const type = await browser.$('select[name="vistaLogin:frmLogin:selNit"]');
-      console.log(await type.$('option[value="2"'));
-
-      const dataTypeUser = await typeUser.$$('option');
-      await dataTypeUser.map(item => {
-        console.log(item.getValue());
-      })
-
-      const document = await browser.$('input[name="vistaLogin:frmLogin:txtUsuario"]');
-      await document.setValue('1117552597');
+      const numberOrganization = await browser.$('input[name="vistaLogin:frmLogin:txtNit"]');
+      await numberOrganization.isDisplayedInViewport();
 
       const typeDocument = await browser.$('select[name="vistaLogin:frmLogin:selTipoDoc"]');
-      const subTypeDocument = await typeDocument.$$('option')[1];
-      await subTypeDocument.map(item => {
-        console.log(item.getValue());
-      });
-      console.log(await typeDocument.getValue());
+      await typeDocument.selectByAttribute('value', '13');
+      /* await typeDocument.selectByIndex(2); */
+
+      const document = await browser.$('input[name="vistaLogin:frmLogin:txtUsuario"]');
+      await document.setValue(`${process.env.DIAN_USER}`);
 
       const password = await browser.$('input[name="vistaLogin:frmLogin:txtCadena"]');
-      await password.setValue('caol9901');
+      await password.setValue(`${process.env.DIAN_PASSWORD}`);
 
-      const botton = await browser.$('form[name="vistaLogin:frmLogin"]')
-      await botton.submit();
+      const form = await browser.$('form');
+      const button = await form.$('input[name="vistaLogin:frmLogin:_id18"]');
+      await button.getHTML();
+      await button.isClickable()
+      await button.doubleClick()
 
-      console.log(await browser.getAllCookies());
 
+      await browser.pause(10000);
       await browser.deleteSession()
-    })().catch(async (e) => {
-      console.error(e.stack)
-      await browser.deleteSession()
+    })().catch((err) => {
+      console.error(err)
+      return browser.deleteSession()
     })
 
   }
