@@ -1,18 +1,4 @@
-import {
-  Column,
-  Entity,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  Unique,
-  CreateDateColumn,
-  UpdateDateColumn
-} from "typeorm";
-
-import { Person } from "./person.entity";
-import { Client } from "./client.entity";
-import { UserRole } from "./userRole.entity";
-import { UserPermission } from "./userPermission.entity";
+import { Column, Entity, PrimaryGeneratedColumn, Unique, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { States } from "../enums/states.enum";
 
 @Entity("user", { schema: 'users' })
@@ -39,17 +25,5 @@ export class User {
 
   @UpdateDateColumn({ type: "timestamp", name: "updated_at" })
   updatedAt: Date;
-
-  @OneToOne(type => Person, person => person.user)
-  person: Person;
-
-  @OneToOne(type => Client, client => client.user)
-  client: Client;
-
-  @OneToMany(type => UserRole, userRole => userRole.user)
-  roles: UserRole[];
-
-  @OneToMany(type => UserPermission, userPermission => userPermission.user)
-  permissions: UserPermission[];
 
 }
