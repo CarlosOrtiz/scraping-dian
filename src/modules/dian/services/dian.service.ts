@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
-const { remote } = require('webdriverio');
+import moment = require('moment');
 
+const { remote } = require('webdriverio');
+const path = require('path')
+const fs = require('fs')
 @Injectable()
 export class DianService {
 
@@ -8,20 +11,27 @@ export class DianService {
 
   async login() {
     let browser;
+    const downloadDir = path.join(__dirname, '../../../../src/modules/dian/files');
+    console.log(downloadDir);
+
     (async () => {
       browser = await remote({
-        logLevel: 'trace',
-        capabilities: {
-          browserName: 'chrome'
-        },
-        waitforTimeout: 50000,
-        //
-        // Default timeout in milliseconds for request
-        // if browser driver or grid doesn't send response
-        connectionRetryTimeout: 120000,
+        logLevel: 'info',
+        acceptInsecureCerts: true,
+        capabilities: [{
+          browserName: 'chrome',
+          'goog:chromeOptions': {
+            'args': ['--headless', '--silent', '--test-type', '--start-maximized'],
+            prefs: {
+              'directory_upgrade': true,
+              'prompt_for_download': false,
+              'download.default_directory': downloadDir
+            }
+          }
+        }]
       });
 
-      await browser.url('https://muisca.dian.gov.co/WebArquitectura/DefLogin.faces')
+      await browser.url(`${process.env.DIAN_URL_BASE}`)
 
       const typedUser = await browser.$('select[name="vistaLogin:frmLogin:selNit"]');
       await typedUser.selectByAttribute('value', '2');
@@ -41,49 +51,50 @@ export class DianService {
 
       const form = await browser.$('form');
       const button = await form.$('input[name="vistaLogin:frmLogin:_id18"]');
-      await button.getHTML();
-      await button.isClickable()
       await button.doubleClick()
 
+      /* Descargar Rut */
+      const buttonRut = await browser.$('input[name="vistaDashboard:frmDashboard:btnConsultarRUT"]');
+      await buttonRut.doubleClick();
 
-      await browser.pause(10000);
-      await browser.deleteSession()
+      await browser.pause(3000);
+
+      /* Proceso Para Descargar Informacion Exogena */
+      const buttonExogenous = await browser.$('input[name="vistaDashboard:frmDashboard:btnExogena"]');
+      await buttonExogenous.doubleClick()
+
+      const acceptButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnBuscar"]');
+      await acceptButton.doubleClick()
+
+      const panelSeleccion = await browser.$('table[id="vistaDashboard:frmDashboard:panelSeleccion"]');
+      await panelSeleccion.isExisting();
+
+      const selectYear = await browser.$('table > tbody > tr > td > select');
+      await selectYear.selectByAttribute('value', '2019');
+
+      const queryButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnExogenaGenerar"]');
+      await queryButton.doubleClick()
+
+      let now = moment().format('DDMMYYYYhmmssa');
+      const filePath = await path.join(downloadDir, 'Rut' + `${now.toString()}.png`)
+      console.log(await filePath);
+
+      /* const closeButton = await browser.$('td > div > table > tbody > tr > td > div > img');
+      await closeButton.doubleClick();
+      await browser.back();
+      await browser.navigateTo('https://muisca.dian.gov.co/WebDashboard/DefDashboard.faces'); */
+
+      await browser.pause(2000);
+
+      const closeSession = await browser.$('input[name="vistaEncabezado:frmCabeceraUsuario:_id29"]');
+      await closeSession.doubleClick();
+
+      await browser.deleteSession();
     })().catch((err) => {
       console.error(err)
       return browser.deleteSession()
     })
 
-  }
-
-  async downloadExogenous() {
-    let browser;
-    (async () => {
-      browser = await remote({
-        logLevel: 'trace',
-        capabilities: {
-          browserName: 'chrome'
-        }
-      });
-
-      await browser.url('http://191.102.85.226/GIECOM_PRUEBA/Views/PublicViews/login.aspx')
-
-      const document = await browser.$('input[name="Correo_Electronico"]');
-      await document.setValue('carlos.ortiz@udla.edu.co');
-
-      const password = await browser.$('input[name="contrasena"]');
-      await password.setValue('caol9901');
-
-      const botton = await browser.$('input[name="ctl05"]')
-      await botton.click();
-
-      console.log(await browser.getAllCookies());
-      console.log(await browser.getNamedCookie('ASP.NET_SessionId'));
-
-      await browser.deleteSession()
-    })().catch(async (e) => {
-      console.error(e.stack)
-      await browser.deleteSession()
-    })
   }
 
 }
