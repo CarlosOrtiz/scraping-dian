@@ -53,10 +53,14 @@ exports.config = {
         maxInstances: 5,
         //
         browserName: 'chrome',
-/*         'goog:chromeOptions': {
-            args: ['--silent']
-            /* args: ['--headless','--silent'], 
-        }, */
+        'goog:chromeOptions': {
+            'args': ['--headless', '--silent', '--test-type', '--start-maximized'],
+            prefs: {
+                'directory_upgrade': true,
+                'prompt_for_download': false,
+                'download.default_directory': downloadDir
+            }
+        },
         acceptInsecureCerts: true
         // If outputDir is provided WebdriverIO can capture driver session logs
         // it is possible to configure which logTypes to include/exclude.
