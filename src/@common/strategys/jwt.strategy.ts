@@ -8,8 +8,6 @@ import { TokenService } from '../services/token.service'
 export interface TokenJwt {
   id: number,
   email: string,
-  person: object,
-  client: object,
   iat?: Date
 }
 

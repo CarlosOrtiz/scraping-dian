@@ -6,7 +6,7 @@ import Multer from './@common/multer/multer';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppService) { }
 
   @Get()
   getHello(): string {
@@ -15,7 +15,7 @@ export class AppController {
 
   @Post('/file')
   @UseInterceptors(FileInterceptor('image', Multer.storageGCS('image')))
-  uploadFile(@UploadedFile() file){
+  uploadFile(@UploadedFile() file) {
     console.log(file)
   }
 }
