@@ -8,7 +8,7 @@ export class DianController {
 
   @Get()
   async login() {
-    return await this.dianService.automationProcessPhaseOne();
+    return this.dianService.automationProcessPhaseOne();
   }
 
 }
