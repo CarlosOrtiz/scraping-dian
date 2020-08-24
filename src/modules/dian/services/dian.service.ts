@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import moment = require('moment');
 
-const { remote } = require('webdriverio');
+const { remote } = require('webdriverio')
+const sync = require('@wdio/sync').default
+
 const path = require('path');
 const fs = require('fs');
 
@@ -10,14 +12,43 @@ export class DianService {
 
   constructor() { }
 
+  async test() {
+    const downloadDir = path.join(__dirname, '../../../../src/modules/dian/files');
+
+    remote({
+      runner: 'local',
+      outputDir: __dirname,
+      logLevel: 'trace',
+      acceptInsecureCerts: true,
+      capabilities: [{
+        browserName: 'chrome',
+        'goog:chromeOptions': {
+          'args': ['--headless', '--silent', '--test-type', '--start-maximized'],
+          prefs: {
+            'directory_upgrade': true,
+            'prompt_for_download': false,
+            'download.default_directory': downloadDir
+          }
+        }
+      }]
+    }).then((browser) => sync(() => {
+      browser.url('https://webdriver.io')
+      console.log(browser.getTitle())
+      browser.deleteSession()
+    }))
+  }
+
   async automationProcessPhaseOne() {
     let browser;
     const downloadDir = path.join(__dirname, '../../../../src/modules/dian/files');
+    const newPath = downloadDir;
+    const oldPath = path.join(__dirname, '../../../../../../');
     console.log(downloadDir);
+    console.log(oldPath);
 
     (async () => {
       browser = await remote({
-        logLevel: 'info',
+        logLevel: 'trace',
         capabilities: {
           browserName: 'chrome'
         }
@@ -76,9 +107,9 @@ export class DianService {
       const queryButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnExogenaGenerar"]');
       await queryButton.doubleClick()
 
-      let now = moment().format('DDMMYYYYhmmssa');
-      const filePath = await path.join(downloadDir, 'Rut' + `${now.toString()}.png`)
-      console.log(await filePath);
+      /*       let now = moment().format('DDMMYYYYhmmssa');
+            const filePath = await path.join(downloadDir, 'Rut' + `${now.toString()}.png`)
+            console.log(await filePath); */
 
       await browser.pause(2000);
       const closeSession = await browser.$('input[name="vistaEncabezado:frmCabeceraUsuario:_id29"]');
