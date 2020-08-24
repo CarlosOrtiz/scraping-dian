@@ -1,3 +1,9 @@
+const path = require('path')
+const fs = require('fs')
+const rmdir = require('./../@common/util/rmdir')
+
+global.downloadDir = path.join(__dirname, 'tempDownload');
+
 exports.config = {
     //
     // ====================
@@ -17,7 +23,7 @@ exports.config = {
     // directory is where your package.json resides, so `wdio` will be called from there.
     //
     specs: [
-        './test/specs/**/basic.js'
+        './test/specs/**/download.js'
     ],
     // Patterns to exclude.
     exclude: [
@@ -56,12 +62,10 @@ exports.config = {
         'goog:chromeOptions': {
             'args': ['--headless', '--silent', '--test-type', '--start-maximized'],
             prefs: {
-                'directory_upgrade': true,
-                'prompt_for_download': false,
                 'download.default_directory': downloadDir
             }
         },
-        acceptInsecureCerts: true
+        acceptInsecureCerts: true,
         // If outputDir is provided WebdriverIO can capture driver session logs
         // it is possible to configure which logTypes to include/exclude.
         // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
@@ -98,7 +102,7 @@ exports.config = {
     // with `/`, the base url gets prepended, not including the path portion of your baseUrl.
     // If your `url` parameter starts without a scheme or `/` (like `some/path`), the base url
     // gets prepended directly.
-    baseUrl: 'http://localhost',
+    baseUrl: 'http://the-internet.herokuapp.com/',
     //
     // Default timeout for all waitFor* commands.
     waitforTimeout: 50000,
@@ -114,7 +118,23 @@ exports.config = {
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
     // commands. Instead, they hook themselves up into the test process.
-    //services: ['selenium-standalone'],
+    services: [
+        ['selenium-standalone', {
+            logPath: 'logs',
+            installArgs: {
+                drivers: {
+                    chrome: { version: '79.0.3945.88' },
+                    firefox: { version: '0.26.0' }
+                }
+            },
+            args: {
+                drivers: {
+                    chrome: { version: '79.0.3945.88' },
+                    firefox: { version: '0.26.0' }
+                }
+            },
+        }]
+    ],
 
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
@@ -146,6 +166,17 @@ exports.config = {
         ui: 'bdd',
         timeout: 60000
     },
+
+    onPrepare: function (config, capabilities) {
+        // make sure download directory exists
+        if (!fs.existsSync(downloadDir)) {
+            // if it doesn't exist, create it
+            fs.mkdirSync(downloadDir);
+        }
+    },
+    onComplete: function () {
+        rmdir(downloadDir)
+    }
     //
     // =====
     // Hooks
