@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn, Unique, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { States } from "../enums/states.enum";
 
-@Entity("user", { schema: 'users' })
+@Entity("user", { schema: 'security' })
 @Unique(["email"])
 export class User {
 

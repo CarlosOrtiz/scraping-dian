@@ -1,7 +1,6 @@
-import { Column, Entity, JoinColumn, PrimaryGeneratedColumn, ManyToOne, OneToOne, CreateDateColumn } from "typeorm";
-import { User } from "./user.entity";
+import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn } from "typeorm";
 
-@Entity("audit", { schema: 'users' })
+@Entity("audit", { schema: 'security' })
 export class Audit {
 
   @PrimaryGeneratedColumn({ type: "bigint" })
