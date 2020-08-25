@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import moment = require('moment');
+import { DianDTO } from '../dto/dian.dto';
 
 const { remote } = require('webdriverio')
 const sync = require('@wdio/sync').default
@@ -38,7 +39,7 @@ export class DianService {
     }))
   }
 
-  async automationProcessPhaseOne() {
+  async automationProcessPhaseOne(body: DianDTO) {
     let browser;
     const downloadDir = path.join(__dirname, '../../../../src/modules/dian/files');
     const newPath = downloadDir;
@@ -79,10 +80,10 @@ export class DianService {
       await typeDocument.selectByAttribute('value', '13');
 
       const document = await browser.$('input[name="vistaLogin:frmLogin:txtUsuario"]');
-      await document.setValue(`${process.env.DIAN_USER}`);
+      await document.setValue(body.document);
 
       const password = await browser.$('input[name="vistaLogin:frmLogin:txtCadena"]');
-      await password.setValue(`${process.env.DIAN_PASSWORD}`);
+      await password.setValue(body.password);
 
       const form = await browser.$('form');
       const button = await form.$('input[name="vistaLogin:frmLogin:_id18"]');
