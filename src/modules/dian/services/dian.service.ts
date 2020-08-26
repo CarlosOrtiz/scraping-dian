@@ -2,124 +2,163 @@ import { Injectable } from '@nestjs/common';
 import moment = require('moment');
 import { DianDTO } from '../dto/dian.dto';
 
-const { remote } = require('webdriverio')
+const config = require('../../../../wdio.conf.js')
+
+const { remote } = require('webdriverio');
 const sync = require('@wdio/sync').default
 
 const path = require('path');
 const fs = require('fs');
+
+const phantomjs = require('phantomjs-prebuilt')
+const wdOpts = {
+  desiredCapabilities: {
+    browserName: 'phantomjs',
+    'phantomjs.page.settings.loadImages': false,
+  }
+}
 
 @Injectable()
 export class DianService {
 
   constructor() { }
 
-  async test() {
-    const downloadDir = path.join(__dirname, '../../../../src/modules/dian/files');
-
-    remote({
-      runner: 'local',
-      outputDir: __dirname,
-      logLevel: 'trace',
-      acceptInsecureCerts: true,
-      capabilities: [{
-        browserName: 'chrome',
-        'goog:chromeOptions': {
-          'args': ['--headless', '--silent', '--test-type', '--start-maximized'],
-          prefs: {
-            'directory_upgrade': true,
-            'prompt_for_download': false,
-            'download.default_directory': downloadDir
-          }
-        }
-      }]
-    }).then((browser) => sync(() => {
-      browser.url('https://webdriver.io')
-      console.log(browser.getTitle())
-      browser.deleteSession()
-    }))
-  }
-
-  async automationProcessPhaseOne(body: DianDTO) {
+  async downloadExogenousRut(body: DianDTO) {
     let browser;
     const downloadDir = path.join(__dirname, '../../../../src/modules/dian/files');
-    const newPath = downloadDir;
     const oldPath = path.join(__dirname, '../../../../../../');
-    console.log(downloadDir);
-    console.log(oldPath);
+    const asd = config;
+
+    if (!body.document) {
+      return { error: 'DOCUMENT_IS_NULL', detail: 'El campo de document se encuentra vacio.' }
+    } else if (!body.password) {
+      return { error: 'PASSWORD_IS_NULL', detail: 'El campo de password se encuentra vacio.' }
+    }
 
     (async () => {
       browser = await remote({
-        logLevel: 'trace',
+        logLevel: 'error', /* trace | debug | info | warn | error | silent */
+        automationProtocol: 'devtools',
         capabilities: {
-          browserName: 'chrome'
-        }
-        /* acceptInsecureCerts: true,
-        capabilities: [{
           browserName: 'chrome',
           'goog:chromeOptions': {
-            'args': ['--headless', '--silent', '--test-type', '--start-maximized'],
+            'args': [/* '--headless', */ '--silent', '--test-type', '--disable-gpu'],
             prefs: {
               'directory_upgrade': true,
               'prompt_for_download': false,
               'download.default_directory': downloadDir
             }
           }
-        }] */
+        }
       });
 
       await browser.url(`${process.env.DIAN_URL_BASE}`);
+      console.log('URL ✅');
+
+      /* Login */
+      const loginForm = await browser.$('form > table[class="formulario_muisca"] > tbody > tr tr table');
       await browser.pause(1000);
 
-      const typedUser = await browser.$('select[name="vistaLogin:frmLogin:selNit"]');
-      await typedUser.selectByAttribute('value', '2');
+      if (!loginForm.isExisting())
+        return { error: 'FORM_NOT_EXITS', detail: 'El formulario del login no existe' }
 
-      const numberOrganization = await browser.$('input[name="vistaLogin:frmLogin:txtNit"]');
-      await numberOrganization.isDisplayedInViewport();
+      const selectAll = await browser.$$('form > table tbody tr td select');
+      await selectAll[0].selectByAttribute('value', '2');  // typeUser
+      await selectAll[1].selectByAttribute('value', '13'); // typeDocument
+      await browser.pause(1000);
 
-      const typeDocument = await browser.$('select[name="vistaLogin:frmLogin:selTipoDoc"]');
-      await typeDocument.selectByAttribute('value', '13');
+      const credentials = await browser.$$('form > table tbody tr td input');
+      await credentials[0].isDisplayed();           // numberDocumentOrganization
+      await credentials[1].setValue(body.document); // numberDocument
+      await credentials[2].setValue(body.password); // password
+      await credentials[4].doubleClick();           // buttonLogin
+      await browser.pause(1000);
+      console.log('LOGIN ✅');
 
-      const document = await browser.$('input[name="vistaLogin:frmLogin:txtUsuario"]');
-      await document.setValue(body.document);
+      /* Dashboard*/
+      const dashboardForm = await browser.$$('form table');
 
-      const password = await browser.$('input[name="vistaLogin:frmLogin:txtCadena"]');
-      await password.setValue(body.password);
+      if (!dashboardForm[17].isExisting())
+        return { error: 'ADMIN_FORM_NOT_EXITS', detail: 'El formulario del dashboard no existe' }
 
-      const form = await browser.$('form');
-      const button = await form.$('input[name="vistaLogin:frmLogin:_id18"]');
-      await button.doubleClick()
+      await browser.pause(1000);
+      const panels = await browser.$$('form table table table table table tbody > tr > td > input');
+      await browser.pause(1000);
+      console.log('DASHBOARD ✅');
 
-      /* Descargar Rut */
-      const buttonRut = await browser.$('input[name="vistaDashboard:frmDashboard:btnConsultarRUT"]');
-      await buttonRut.doubleClick();
+      const rut = await panels[9].doubleClick(); // I download the RUT
+      await browser.pause(1500);
+      console.log('DOWNLOAD THE RUT ✅');
 
-      await browser.pause(3000);
+      await panels[0].doubleClick(); // open information panel
+      await browser.pause(1000);
 
-      /* Proceso Para Descargar Informacion Exogena */
-      const buttonExogenous = await browser.$('input[name="vistaDashboard:frmDashboard:btnExogena"]');
-      await buttonExogenous.doubleClick()
+      console.log('PANEL INFORMATION EXOGENOUS ✅');
+      const panelExogenous = await browser.$$('div[class="dr-mpnl-panel rich-mpnl_panel"] table table'); // Panel Information Exogenous
 
-      const acceptButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnBuscar"]');
-      await acceptButton.doubleClick()
+      if (!panelExogenous[4].isExisting())
+        return { error: 'ADMIN_FORM_NOT_EXITS', detail: 'El formulario del dashboard no existe' }
+
+      const buttonExogenous = await browser.$$('div[class="dr-mpnl-panel rich-mpnl_panel"] table table input');
+      await buttonExogenous[2].doubleClick();
+      await browser.pause(1000);
 
       const selectYear = await browser.$('table > tbody > tr > td > select');
       await selectYear.selectByAttribute('value', '2019');
+      await browser.pause(500);
 
-      const queryButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnExogenaGenerar"]');
-      await queryButton.doubleClick()
+      await browser.pause(500);
+      await buttonExogenous[3].doubleClick();
 
-      /*       let now = moment().format('DDMMYYYYhmmssa');
-            const filePath = await path.join(downloadDir, 'Rut' + `${now.toString()}.png`)
-            console.log(await filePath); */
+      console.log('CLOSE PANEL INFORMATION EXOGENOUS ✅');
+      const closePanel = await panelExogenous[4].$$('tbody td div > img');
+      await closePanel[0].doubleClick();
+      await browser.pause(1000);
 
-      await browser.pause(2000);
-      const closeSession = await browser.$('input[name="vistaEncabezado:frmCabeceraUsuario:_id29"]');
-      await closeSession.doubleClick();
+      /* Logout Panel */
+      console.log('LOGOUT PANEL ✅');
+      if (!dashboardForm[4].isExisting())
+        return { error: 'LOGOUT_PANEL_NOT_EXITS', detail: 'El panel de cerrar sesion no existe' }
+
+      await browser.pause(1000);
+      await browser.refresh();
+      const logoutPanel = await browser.$$('form table input')
+      await logoutPanel[3].doubleClick();
+      console.log('FINISHED ✅');
+      console.log(' ');
 
       await browser.deleteSession();
     })().catch((err) => {
       console.error(err)
       return browser.deleteSession()
+    })
+  }
+
+  async rentalDeclaration(body) {
+    return { success: 'OK' }
+  }
+
+  async test2() {
+    let client;
+
+    (async function () {
+      client = await remote({
+        automationProtocol: 'devtools',
+        capabilities: { browserName: 'chrome' }
+      })
+
+      await client.url('https://news.ycombinator.com')
+      const browser = client.puppeteerBrowser
+      const page = (await browser.pages())[0]
+      await page.pdf({
+        path: 'hn.pdf',
+        format: 'letter'
+      })
+      console.log(page)
+      await client.deleteSession()
+    })().catch(async (e) => {
+      console.error(e.stack)
+      await client.deleteSession()
     })
   }
 

@@ -2,12 +2,10 @@ import { Length, IsEmail, IsNumber, IsString, IsNotEmpty } from 'class-validator
 
 export class DianDTO {
 
-  @IsNumber()
-  @IsNotEmpty()
+  @IsString()
   document: string;
 
   @IsString()
-  @IsNotEmpty()
   password: string;
 
 }
