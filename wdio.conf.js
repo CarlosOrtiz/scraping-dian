@@ -19,7 +19,7 @@ exports.config = {
     // directory is where your package.json resides, so `wdio` will be called from there.
     //
     specs: [
-        './test/specs/**/download.js'
+        './test/specs/**/basic.js'
     ],
     // Patterns to exclude.
     exclude: [
@@ -56,8 +56,10 @@ exports.config = {
         //
         browserName: 'chrome',
         'goog:chromeOptions': {
-            'args': ['--headless', '--silent', '--test-type', '--start-maximized'],
+            'args': ['--silent', '--test-type', '--start-maximized'],
             prefs: {
+                'directory_upgrade': true,
+                'prompt_for_download': false,
                 'download.default_directory': downloadDir
             }
         },
