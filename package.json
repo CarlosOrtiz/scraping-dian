@@ -45,8 +45,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",
-    "typeorm": "^0.2.24",
-    "webdriverio": "^6.4.0"
+    "typeorm": "^0.2.24"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.0.0",
@@ -80,7 +79,8 @@
     "ts-node": "^8.8.2",
     "tsconfig-paths": "^3.9.0",
     "typescript": "^3.7.4",
-    "wdio-chromedriver-service": "^6.0.3"
+    "wdio-chromedriver-service": "^6.0.3",
+    "webdriverio": "^6.4.2"
   },
   "jest": {
     "moduleFileExtensions": [
