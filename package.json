@@ -38,6 +38,7 @@
     "crypto": "^1.0.1",
     "devtools": "^6.4.1",
     "moment": "^2.27.0",
+    "node-google-drive-new": "^1.1.4",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "pg": "^8.0.0",

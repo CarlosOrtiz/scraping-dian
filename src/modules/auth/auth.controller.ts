@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Post,
-  UnauthorizedException,
-  Body,
-  Inject,
-  BadRequestException
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-
+import { Controller, Post, Body, Inject, Query, Get } from '@nestjs/common';
 import { LoginService } from './services/login.service';
 import { Login } from './dto/login.dto'
 
@@ -15,20 +6,16 @@ import { Login } from './dto/login.dto'
 export class AuthController {
 
   constructor(
-    @Inject('CryptoService') private readonly cryptoService,
-    private readonly jwtService: JwtService,
     private readonly loginService: LoginService,
   ) { }
 
   @Post('/login')
   async login(@Body() body: Login) {
-    body.email = body.email.toLowerCase()
-    body.password = this.cryptoService.encrypt(body.password);
-    const response: any = await this.loginService.login(body);
+    return await this.loginService.loginPost(body);
+  }
 
-    if (response.error)
-      throw new UnauthorizedException(response);
-
-    return { success: 'OK', token: await this.jwtService.sign({ ...response }) }
+  @Get('/login')
+  async loginGet(@Query('document') document, @Query('password') password) {
+    return await this.loginService.loginGet(document, password);
   }
 }

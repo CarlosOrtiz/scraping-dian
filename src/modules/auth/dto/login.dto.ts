@@ -1,11 +1,13 @@
-import { Length, IsEmail } from 'class-validator';
+import { Length, IsEmail, IsString, IsNotEmpty } from 'class-validator';
 
 export class Login {
 
-  @IsEmail()
-  email: string;
+  @IsString()
+  @IsNotEmpty()
+  document: string;
 
   @Length(3, 30)
+  @IsNotEmpty()
   password: string;
 
 }

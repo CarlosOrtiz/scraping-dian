@@ -1,5 +1,27 @@
-const path = require('path');
+const path = require('path')
+const fs = require('fs')
+
 global.downloadDir = path.join(__dirname, 'tempDownload');
+
+function rmdir(dir) {
+    var list = fs.readdirSync(dir);
+    for (var i = 0; i < list.length; i++) {
+        var filename = path.join(dir, list[i]);
+        var stat = fs.statSync(filename);
+
+        if (filename == "." || filename == "..") {
+            // pass these files
+        } else if (stat.isDirectory()) {
+            // rmdir recursively
+            rmdir(filename);
+        } else {
+            // rm fiilename
+            fs.unlinkSync(filename);
+        }
+    }
+    fs.rmdirSync(dir);
+}
+
 exports.config = {
     //
     // ====================
@@ -47,7 +69,7 @@ exports.config = {
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://docs.saucelabs.com/reference/platforms-configurator
     //
-    capabilities: [{
+    capabilities: {
 
         // maxInstances can get overwritten per capability. So if you have an in-house Selenium
         // grid with only 5 firefox instances available you can make sure that not more than
@@ -56,7 +78,7 @@ exports.config = {
         //
         browserName: 'chrome',
         'goog:chromeOptions': {
-            'args': ['--silent', '--test-type', '--start-maximized'],
+            'args': ['--start-maximized',/*'--silent',  '--test-type', '--start-maximized','--headless' */],
             prefs: {
                 'directory_upgrade': true,
                 'prompt_for_download': false,
@@ -68,7 +90,7 @@ exports.config = {
         // it is possible to configure which logTypes to include/exclude.
         // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
         // excludeDriverLogs: ['bugreport', 'server'],
-    }],
+    },
     //
     // ===================
     // Test Configurations
@@ -100,7 +122,7 @@ exports.config = {
     // with `/`, the base url gets prepended, not including the path portion of your baseUrl.
     // If your `url` parameter starts without a scheme or `/` (like `some/path`), the base url
     // gets prepended directly.
-    baseUrl: 'https://muisca.dian.gov.co/WebArquitectura/DefLoginOld.faces',
+    baseUrl: 'https://localhost',
     //
     // Default timeout for all waitFor* commands.
     waitforTimeout: 50000,
@@ -133,7 +155,12 @@ exports.config = {
              },
          }]
      ], */
-    services: ['chromedriver'],
+    services: [
+        ['chromedriver', {
+            outputDir: 'driver-logs', // overwrites the config.outputDir
+            args: ['--silent'] //
+        }]
+    ],
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
     // see also: https://webdriver.io/docs/frameworks.html
@@ -153,9 +180,11 @@ exports.config = {
     // see also: https://webdriver.io/docs/dot-reporter.html
     reporters: ['spec'],
 
-
-
-    //
+    /*     onPrepare: function (config, capabilities) {
+            if (!fs.existsSync(downloadDir)) {
+                fs.mkdirSync(downloadDir);
+            }
+        }, */
     // Options to be passed to Mocha.
     // See the full list at http://mochajs.org/
     mochaOpts: {
@@ -304,4 +333,7 @@ exports.config = {
     */
     //onReload: function(oldSessionId, newSessionId) {
     //}
+    /*     onComplete: function (exitCode, config, capabilities) {
+            rmdir(downloadDir)
+        } */
 }
