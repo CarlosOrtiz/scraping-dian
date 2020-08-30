@@ -26,6 +26,11 @@ export class DianController {
     return this.exogenousService.downloadExogenous(document, password);
   }
 
+  @Get('/download/rut-exogenous')
+  async downloadRutExogenous(@Query('document') document, @Query('password') password) {
+    return this.dianService.downloadExogenousRut(document, password);
+  }
+
   @Post('rental-declaration')
   async rentalDeclaration(@Body() body: RentalDeclaration) {
     return this.rentalDeclarationService.rentalDeclaration(body);
