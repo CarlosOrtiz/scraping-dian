@@ -78,7 +78,7 @@ exports.config = {
         //
         browserName: 'chrome',
         'goog:chromeOptions': {
-            'args': ['--start-maximized',/*'--silent',  '--test-type', '--start-maximized','--headless' */],
+            'args': ['--start-maximized', '--silent', '--test-type', '--disable-dev-shm-usage'/* '--headless' */],
             prefs: {
                 'directory_upgrade': true,
                 'prompt_for_download': false,
@@ -98,7 +98,7 @@ exports.config = {
     // Define all options that are relevant for the WebdriverIO instance here
     //
     // Level of logging verbosity: trace | debug | info | warn | error | silent
-    logLevel: 'info',
+    logLevel: 'trace',
     //
     // Set specific log levels per logger
     // loggers:

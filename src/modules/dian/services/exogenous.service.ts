@@ -1,10 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { ExogenousRut } from '../dto/exogenousRut.dto';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { LoginService } from '../../auth/services/login.service';
-
-const config = require('../../../../wdio.conf.js')
-const { remote } = require('webdriverio');
-const path = require('path');
+import { config } from '../../../../wdio.conf';
+import { remote } from 'webdriverio';
 
 @Injectable()
 export class ExogenousService {
@@ -13,43 +10,37 @@ export class ExogenousService {
     private readonly loginService: LoginService
   ) { }
 
-  async downloadExogenous(document, password) {
+  async downloadExogenous(document: string, password: string) {
     let browser;
-    const downloadDir = path.join(__dirname, '../../../../src/modules/dian/files');
-    const oldPath = path.join(__dirname, '../../../../../../');
-    const asd = config;
 
-    if (!document) {
-      return { error: 'DOCUMENT_IS_NULL', detail: 'El campo de document se encuentra vacio.' }
-    } else if (!password) {
-      return { error: 'PASSWORD_IS_NULL', detail: 'El campo de password se encuentra vacio.' }
-    }
+    if (!document)
+      throw new BadRequestException({
+        error: 'DOCUMENT_IS_NULL',
+        detail: 'El campo de document se encuentra vacio.'
+      })
 
-    const t = (async () => {
-      browser = await remote({
-        logLevel: 'trace', /* trace | debug | info | warn | error | silent */
-        automationProtocol: 'devtools',
-        capabilities: {
-          browserName: 'chrome',
-          'goog:chromeOptions': {
-            'args': [/* '--headless', */ '--silent', '--test-type', '--disable-gpu', '--window-size=1200,700'],
-            prefs: {
-              'directory_upgrade': true,
-              'prompt_for_download': false,
-              'download.default_directory': downloadDir
-            }
-          }
-        }
+    if (!password)
+      throw new BadRequestException({
+        error: 'PASSWORD_IS_NULL',
+        detail: 'El campo de password se encuentra vacio.'
       });
 
-      await browser.url(`${process.env.DIAN_URL_BASE}`);
+    let exogenous;
+
+    try {
+      browser = await remote(config);
+
       console.log('URL ✅');
+      await browser.url(`${process.env.DIAN_URL_BASE}`);
 
       const loginForm = await browser.$('form > table[class="formulario_muisca"] > tbody > tr tr table');
       await browser.pause(1000);
 
       if (!loginForm.isExisting())
-        return await browser.deleteSession();
+        throw new BadRequestException({
+          error: 'FORM_LOGIN_NOT_FOUND',
+          detail: 'EL formulario de la pagina del iniciar sesión no se encontro.'
+        });
 
       console.log('LOGIN... ✅');
       await browser.pause(1000);
@@ -67,22 +58,20 @@ export class ExogenousService {
       await browser.pause(1000);
 
       /* Dashboard*/
-      const dashboardForm = await browser.$$('form table');
+      const dashboardForm = await browser.$$('form table input');
 
-      /* if (!dashboardForm[14].isExisting())
-        return await browser.deleteSession(); */
+      if (!dashboardForm[4].isExisting())
+        throw new BadRequestException({
+          error: 'DASHBOARD_NOT_FOUND',
+          detail: 'La pagina principal del administrador no se encontro.'
+        });
 
+      console.log('DASHBOARD OPEN ✅');
       await browser.pause(1000);
-      const panels = await dashboardForm[14].$$('table table table table tbody > tr > td > input');
-      await browser.pause(1000);
-      console.log('DASHBOARD ✅');
-
+      await dashboardForm[4].doubleClick(); // Open information panel
       console.log('OPEN PANEL INFORMATION EXOGENOUS ✅');
-      await panels[0].click(); // open information panel
       await browser.pause(1000);
-
-      /*       const buttonExogenous = await browser.$('input[name="vistaDashboard:frmDashboard:btnExogena"]');
-            await buttonExogenous.doubleClick() */
+      exogenous = { url: await dashboardForm[4].getHTML() }
 
       const acceptButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnBuscar"]');
       await acceptButton.doubleClick()
@@ -96,23 +85,7 @@ export class ExogenousService {
       await queryButton.click()
       await browser.pause(1000);
 
-      /*       const buttonExogenous = await browser.$('input');
-            await buttonExogenous.doubleClick();
-            await browser.pause(1000);
-      
-            const selectYear = await browser.$('select');
-            await selectYear[0].selectByAttribute('value', '2019');
-            await browser.pause(500);
-      
-            await browser.pause(500);
-            await buttonExogenous[1].doubleClick(); */
-
       console.log('CLOSE PANEL INFORMATION EXOGENOUS ✅');
-      /*      const closePanel = await browser.$$('tbody td div > img');
-           await closePanel[0].doubleClick();
-           await browser.pause(1000); */
-
-      await browser.dismissAlert()
 
       /* Logout Panel */
       console.log('LOGOUT PANEL ✅');
@@ -132,12 +105,17 @@ export class ExogenousService {
       console.log(' ');
 
       await browser.deleteSession();
-    })().catch((err) => {
-      console.error(err)
-      return browser.deleteSession()
-    })
+    } catch (err) {
+      console.log(err)
+      await browser.deleteSession();
 
-    return t
+      if (err.name == 'Error')
+        return { error: 'ERR_INTERNET_DISCONNECTED', detail: 'No tiene internet' }
+
+      return err.response
+    }
+
+    return { success: 'OK', data: exogenous }
   }
 
 }
