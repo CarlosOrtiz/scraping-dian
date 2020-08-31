@@ -21,7 +21,7 @@ export class Audit {
   @Column("character varying", { length: 100 })
   process: string;
 
-  @Column("character varying", { length: 1000 })
+  @Column("character varying", { length: 1000, nullable: true })
   view: string;
 
   @CreateDateColumn({ type: "timestamp", name: "created_at" })
