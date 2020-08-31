@@ -207,14 +207,14 @@ export class DianService {
 
             const queryButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnExogenaGenerar"]');
             await queryButton.click()
-            await browser.pause(1000);
+            await browser.pause(2100);
 
             console.log('CLOSE PANEL INFORMATION EXOGENOUS ✅');
 
             /* Logout Panel */
             console.log('LOGOUT PANEL OPENED ✅')
             if (dashboardForm[3]) {
-              await browser.pause(1000);
+              await browser.pause(1100);
               await dashboardForm[3].doubleClick(); // button logout
               await browser.pause(500);
 
@@ -259,6 +259,21 @@ export class DianService {
 
         await browser.deleteSession()
         return err.response
+      } else if (err.name == 'stale element reference') {
+        await this.auditRepository.save({
+          name: 'STALE_ELEMENT_REFERENCE',
+          detail: 'referencia de elemento obsoleto',
+          user: document,
+          process: 'Declaración de Renta-Formulario 210',
+          view: await browser.getUrl() || `${process.env.DIAN_URL_BASE}`
+        })
+        await browser.deleteSession()
+
+        return { error: 'STALE_ELEMENT_REFERENCE', detail: 'referencia de elemento obsoleto' };
+      } else if (err.name == 'Error') {
+        await browser.deleteSession()
+
+        return { error: 'NOT_INTERNET_CONECTION', detail: 'No hay conexión a internet' };
       } else {
         await browser.deleteSession()
         return err

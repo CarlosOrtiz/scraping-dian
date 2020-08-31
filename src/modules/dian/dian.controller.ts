@@ -38,7 +38,7 @@ export class DianController {
 
   @Get('/download/rut-exogenous')
   async downloadRutExogenous(@Query('document') document: string, @Query('password') password: string) {
-    return this.exogenousService.downloadExogenous(document, password);
+    return this.dianService.downloadExogenousRut(document, password);
   }
 
   @Post('/download/rut-exogenous')

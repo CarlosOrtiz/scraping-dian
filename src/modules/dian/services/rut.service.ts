@@ -111,12 +111,27 @@ export class RutService {
           name: err.response.error,
           detail: err.response.detail,
           user: document,
-          process: 'Descargar Rut queue',
+          process: 'Descargar Rut',
           view: await browser.getUrl()
         })
 
         await browser.deleteSession()
         return err.response
+      } else if (err.name == 'stale element reference') {
+        await this.auditRepository.save({
+          name: 'STALE_ELEMENT_REFERENCE',
+          detail: 'referencia de elemento obsoleto',
+          user: document,
+          process: 'Declaración de Renta-Formulario 210',
+          view: await browser.getUrl() || `${process.env.DIAN_URL_BASE}`
+        })
+        await browser.deleteSession()
+
+        return { error: 'STALE_ELEMENT_REFERENCE', detail: 'referencia de elemento obsoleto' };
+      } else if (err.name == 'Error') {
+        await browser.deleteSession()
+
+        return { error: 'NOT_INTERNET_CONECTION', detail: 'No hay conexión a internet' };
       } else {
         await browser.deleteSession()
         return err

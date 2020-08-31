@@ -2,12 +2,16 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { LoginService } from '../../auth/services/login.service';
 import { config } from '../../../../wdio.conf';
 import { remote } from 'webdriverio';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Audit } from '../../../entities/security/audit.entity';
 
 @Injectable()
 export class ExogenousService {
 
   constructor(
-    private readonly loginService: LoginService
+    private readonly loginService: LoginService,
+    @InjectRepository(Audit, 'security') private readonly auditRepository: Repository<Audit>,
   ) { }
 
   async downloadExogenous(document: string, password: string) {
@@ -107,14 +111,37 @@ export class ExogenousService {
       await browser.deleteSession();
     } catch (err) {
       console.log(err)
-      await browser.deleteSession();
+      if (err.response) {
+        await this.auditRepository.save({
+          name: err.response.error,
+          detail: err.response.detail,
+          user: document,
+          process: 'Descargar Información Exogena',
+          view: await browser.getUrl() || `${process.env.DIAN_URL_BASE}`
+        })
 
-      if (err.name == 'Error')
-        return { error: 'ERR_INTERNET_DISCONNECTED', detail: 'No tiene internet' }
+        await browser.deleteSession()
+        return err.response
+      } else if (err.name == 'stale element reference') {
+        await this.auditRepository.save({
+          name: 'STALE_ELEMENT_REFERENCE',
+          detail: 'referencia de elemento obsoleto',
+          user: document,
+          process: 'Declaración de Renta-Formulario 210',
+          view: await browser.getUrl() || `${process.env.DIAN_URL_BASE}`
+        })
+        await browser.deleteSession()
 
-      return err.response
+        return { error: 'STALE_ELEMENT_REFERENCE', detail: 'referencia de elemento obsoleto' };
+      } else if (err.name == 'Error') {
+        await browser.deleteSession()
+
+        return { error: 'NOT_INTERNET_CONECTION', detail: 'No hay conexión a internet' };
+      } else {
+        await browser.deleteSession()
+        return err
+      }
     }
-
     return { success: 'OK', data: exogenous }
   }
 

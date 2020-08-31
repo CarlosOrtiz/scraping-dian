@@ -78,9 +78,11 @@ exports.config = {
         maxInstances: 5,
         //
         browserName: 'chrome',
-        'goog:chromeOptions': {
-            headless: true
-        },
+        'args': ['--silent', '--test-type', '--disable-dev-shm-usage', /* '--headless' */],
+        /*  'goog:chromeOptions': 
+         {
+             headless: true
+         }, */
         prefs: {
             'directory_upgrade': true,
             'prompt_for_download': false,
@@ -126,11 +128,11 @@ exports.config = {
     baseUrl: 'https://localhost',
     //
     // Default timeout for all waitFor* commands.
-    waitforTimeout: 50000,
+    waitforTimeout: 180000,
     //
     // Default timeout in milliseconds for request
     // if browser driver or grid doesn't send response
-    connectionRetryTimeout: 120000,
+    connectionRetryTimeout: 300000,
     //
     // Default request retries count
     connectionRetryCount: 3,
@@ -194,7 +196,7 @@ exports.config = {
         // TypeScript setup
         require: ['ts-node/register'],
         ui: 'bdd',
-        timeout: 60000
+        timeout: 6000000000
     },
 
     /*    onPrepare: function (config, capabilities) {

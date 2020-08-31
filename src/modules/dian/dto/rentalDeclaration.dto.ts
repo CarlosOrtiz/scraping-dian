@@ -42,9 +42,9 @@ export class RentalDeclaration {
   @IsOptional()
   sectional_address_code: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  economic_activity: number;
+  economic_activity: string;
 
   @IsString()
   @IsOptional()
@@ -438,22 +438,21 @@ export class RentalDeclaration {
   @IsOptional()
   DV_firm: number;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  dependent_document_type: number;
+  dependent_document_type: string;
 
   @IsNumber()
   @IsOptional()
   dependent_identification: number;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  kinship: number;
+  kinship: string;
 
   @IsBoolean()
   @IsOptional()
   disclaimer: Boolean;
-
 
   /*  Pago total*/
   @IsNumber()
