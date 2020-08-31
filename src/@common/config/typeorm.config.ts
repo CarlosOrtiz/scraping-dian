@@ -12,14 +12,14 @@ export default registerAs('typeorm', () => {
     synchronize: true,
     logging: false,
     entities: ['dist/entities/**/*entity.js'],
-    ssl:  {
+    ssl: {
       rejectUnauthorized: false
     }
     //entities: [(process.env.NODE_ENV === 'local' ? 'src/entities/**/*.ts' : 'dist/entities/**/*.js' )]
   }
 
   return {
-    users: {
+    security: {
       ...configDefault,
     }
   }

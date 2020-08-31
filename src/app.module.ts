@@ -21,7 +21,7 @@ import dianConfig from './@common/config/dian.config';
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => configService.get('typeorm.users'),
+      useFactory: (configService: ConfigService) => configService.get('typeorm.security'),
       name: 'security'
     }),
     CommonModule,
