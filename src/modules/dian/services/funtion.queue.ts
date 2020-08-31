@@ -1,15 +1,14 @@
-import { Processor, Process } from '@nestjs/bull';
+import { Processor, Process, OnQueueActive } from '@nestjs/bull';
 import { Job } from 'bull';
 import { Logger, BadRequestException } from '@nestjs/common';
 import { DianService } from './dian.service';
 import { remote } from 'webdriverio';
-import { config } from '../../../../wdio.conf';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Audit } from '../../../entities/security/audit.entity';
 import { Repository } from 'typeorm';
 
-@Processor('dian')
+@Processor('downloadRut')
 export class FuntionQueue {
   private readonly logger = new Logger(this.constructor.name);
 
@@ -19,17 +18,19 @@ export class FuntionQueue {
   ) { }
 
   @Process({ name: 'downloadRut' })
-  async downloadRutExogenous(job: Job<any>) {
+  async downloadRut(job: Job<any>) {
+    this.onActive(job);
+    const { config, document, password } = job.data;
 
     let browser;
 
-    if (!job.data.document)
+    if (!document)
       throw new BadRequestException({
         error: 'DOCUMENT_IS_NULL',
         detail: 'El campo de document se encuentra vacio.'
       })
 
-    if (!job.data.password)
+    if (!password)
       throw new BadRequestException({
         error: 'PASSWORD_IS_NULL',
         detail: 'El campo de password se encuentra vacio.'
@@ -46,7 +47,7 @@ export class FuntionQueue {
       const loginForm = await browser.$('form > table[class="formulario_muisca"] > tbody > tr tr table');
       await browser.pause(1000);
 
-      if (typeof loginForm.isExisting() === 'undefined')
+      if (!loginForm.isExisting())
         throw new BadRequestException({
           error: 'FORM_LOGIN_NOT_FOUND',
           detail: 'EL formulario de la pagina del iniciar sesión no se encontro.'
@@ -60,8 +61,8 @@ export class FuntionQueue {
 
       const credentials = await browser.$$('form > table tbody tr td input');
       await credentials[0].isDisplayed();           // numberDocumentOrganization
-      await credentials[1].setValue(job.data.document);      // numberDocument
-      await credentials[2].setValue(job.data.password);      // password
+      await credentials[1].setValue(document);      // numberDocument
+      await credentials[2].setValue(password);      // password
       await credentials[4].doubleClick();           // buttonLogin
       console.log('SUCCESSFULL LOGIN ✅');
       await browser.pause(1000);
@@ -100,7 +101,7 @@ export class FuntionQueue {
         await this.auditRepository.save({
           name: err.response.error,
           detail: err.response.detail,
-          user: job.data.document,
+          user: document,
           process: 'Descargar Rut queue',
           view: await browser.getUrl()
         })
@@ -114,5 +115,12 @@ export class FuntionQueue {
     }
 
     return { success: 'OK', data: rut }
+  }
+
+  @OnQueueActive()
+  onActive(job: Job) {
+    console.log(
+      `Processing job ${job.id} of type ${job.name} with data ${job.data}...`,
+    );
   }
 }

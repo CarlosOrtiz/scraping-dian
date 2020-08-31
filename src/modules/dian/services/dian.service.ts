@@ -19,15 +19,15 @@ export class DianService {
     @InjectQueue('dian') private dianQueue: Queue
   ) { }
 
-  async downloadExogenousRutVersionOld(body: ExogenousRut) {
+  async downloadExogenousRutVersionOld(document: string, password: string) {
     let browser;
     const downloadDir = path.join(__dirname, '../../../../src/modules/dian/files');
     const oldPath = path.join(__dirname, '../../../../../../');
     const asd = config;
 
-    if (!body.document) {
+    if (!document) {
       return { error: 'DOCUMENT_IS_NULL', detail: 'El campo de document se encuentra vacio.' }
-    } else if (!body.password) {
+    } else if (!password) {
       return { error: 'PASSWORD_IS_NULL', detail: 'El campo de password se encuentra vacio.' }
     }
 
@@ -65,8 +65,8 @@ export class DianService {
 
       const credentials = await browser.$$('form > table tbody tr td input');
       await credentials[0].isDisplayed();           // numberDocumentOrganization
-      await credentials[1].setValue(body.document); // numberDocument
-      await credentials[2].setValue(body.password); // password
+      await credentials[1].setValue(document); // numberDocument
+      await credentials[2].setValue(password); // password
       await credentials[4].doubleClick();           // buttonLogin
       await browser.pause(1000);
       console.log('LOGIN ✅');

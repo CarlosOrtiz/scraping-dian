@@ -69,6 +69,7 @@ exports.config = {
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://docs.saucelabs.com/reference/platforms-configurator
     //
+    automationProtocol: 'devtools',
     capabilities: {
 
         // maxInstances can get overwritten per capability. So if you have an in-house Selenium
@@ -78,19 +79,19 @@ exports.config = {
         //
         browserName: 'chrome',
         'goog:chromeOptions': {
-            'args': ['--silent', '--test-type', '--disable-dev-shm-usage', /* '--headless' */],
-            prefs: {
-                'directory_upgrade': true,
-                'prompt_for_download': false,
-                'download.default_directory': downloadDir
-            }
+            headless: true
+        },
+        prefs: {
+            'directory_upgrade': true,
+            'prompt_for_download': false,
+            'download.default_directory': downloadDir
         },
         acceptInsecureCerts: true,
-        // If outputDir is provided WebdriverIO can capture driver session logs
-        // it is possible to configure which logTypes to include/exclude.
-        // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
-        // excludeDriverLogs: ['bugreport', 'server'],
     },
+    // If outputDir is provided WebdriverIO can capture driver session logs
+    // it is possible to configure which logTypes to include/exclude.
+    // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
+    // excludeDriverLogs: ['bugreport', 'server'],
     //
     // ===================
     // Test Configurations
@@ -98,7 +99,7 @@ exports.config = {
     // Define all options that are relevant for the WebdriverIO instance here
     //
     // Level of logging verbosity: trace | debug | info | warn | error | silent
-    logLevel: 'error',
+    logLevel: 'trace',
     //
     // Set specific log levels per logger
     // loggers:
@@ -155,12 +156,14 @@ exports.config = {
              },
          }]
      ], */
-    services: [
-        ['chromedriver', {
-            outputDir: 'driver-logs', // overwrites the config.outputDir
-            args: ['--silent'] //
-        }]
-    ],
+    services: ['chromedriver'],
+
+    /*     [
+            ['chromedriver', {
+                outputDir: 'driver-logs', // overwrites the config.outputDir
+                args: ['--silent'] //
+            }]
+        ], */
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
     // see also: https://webdriver.io/docs/frameworks.html
