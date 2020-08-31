@@ -53,7 +53,8 @@ export class RentalDeclarationService {
         await credentials[1].setValue(body.document);      // numberDocument
         await credentials[2].setValue(body.password);      // password
         await credentials[4].doubleClick();                // buttonLogin
-        console.log('SUCCESSFULL LOGIN ✅');
+        console.log('VALIDATE LOGIN ✅');
+
         await browser.pause(1000);
 
         /* Open Dashboard*/
@@ -61,6 +62,7 @@ export class RentalDeclarationService {
         await browser.pause(500);
 
         if (dashboardForm[9]) {
+          console.log('SUCCESSFULL LOGIN ✅');
           console.log('DASHBOARD OPEN ✅');
 
           await dashboardForm[9].doubleClick(); // Open Panel Form 210
@@ -86,7 +88,7 @@ export class RentalDeclarationService {
             console.log(await buttonYes.getHTML());
 
             await browser.pause(2000);
-            await buttonYes.doubleClick();  // click al radio button Si 
+            await buttonYes.click();  // click al radio button Si 
 
             const send = await browser.$('div[class="mat-dialog-actions"] div button[class="mat-button"]');
             await send.doubleClick(); // click al botton enviar
@@ -110,7 +112,7 @@ export class RentalDeclarationService {
               // 100000 + 65 != 63 = 204.000 -100.000 = 104.000
               const economic_activity = await browser.$$('form div div div div select')
               economic_activity[0].getValue() //
-
+              /* Datos Declarante */
               replay.push({ name: 'NIT', value: await panels210[0].getValue() }); //NIT
               replay.push({ name: 'DV', value: await panels210[1].getValue() }); // DV
               replay.push({ name: 'first_lastname', value: await panels210[2].getValue() });
@@ -121,8 +123,114 @@ export class RentalDeclarationService {
               replay.push({ name: 'correction_code', value: await panels210[7].getValue() });
               replay.push({ name: 'previous_from_number', value: await panels210[8].getValue() });
               replay.push({ name: 'economic_activity', value: await economic_activity[0].getValue() });
+              /* Preguntas Si o No */
+              const sdasd = body.income_country === false ? await panels210[10].click() : await panels210[9].click();
+              await browser.pause(1000);
+              replay.push({ name: 'income_country', value: await panels210[0].getValue() });
+              replay.push({ name: 'retirement_unemployment', value: await panels210[0].getValue() });
+              replay.push({ name: 'millitary_forces_police', value: await panels210[0].getValue() });
+              replay.push({ name: 'compensation_insurance', value: await panels210[0].getValue() });
+              replay.push({ name: 'income_public_university', value: await panels210[0].getValue() });
+              replay.push({ name: 'public_servant', value: await panels210[0].getValue() });
+              replay.push({ name: 'hotel_rental_income', value: await panels210[0].getValue() });
+              replay.push({ name: 'work_rental_income', value: await panels210[0].getValue() });
+              replay.push({ name: 'can_capital_income', value: await panels210[0].getValue() });
+              replay.push({ name: 'not_work_rental_income', value: await panels210[0].getValue() });
+              /* Patrimonio */
+              replay.push({ name: 'patrimony_total', value: await panels210[0].getValue() });
+              replay.push({ name: 'debt', value: await panels210[0].getValue() });
+              replay.push({ name: 'total_income_rental_work', value: await panels210[0].getValue() });
+              /* Rentas de trabajo */
+              replay.push({ name: 'total_income_rental_work', value: await panels210[0].getValue() });
+              replay.push({ name: 'not_constitutive_income', value: await panels210[0].getValue() });
+              replay.push({ name: 'cost_deduction_rt', value: await panels210[0].getValue() });
+              replay.push({ name: 'liquid_rental_rt', value: await panels210[0].getValue() });
+              replay.push({ name: 'exempt_rental_rt', value: await panels210[0].getValue() });
+              replay.push({ name: 'limit_rental_exempt_rt', value: await panels210[0].getValue() });
+              replay.push({ name: 'liquid_rental_work_rt', value: await panels210[0].getValue() });
+              /* Rentas de capital */
+              replay.push({ name: 'total_capital_income', value: await panels210[0].getValue() });
+              replay.push({ name: 'income_not_constitutive_rental', value: await panels210[0].getValue() });
+              replay.push({ name: 'cost_deduction_coming', value: await panels210[0].getValue() });
+              replay.push({ name: 'liquid_rental_rc', value: await panels210[0].getValue() });
+              replay.push({ name: 'liquid_rental_passive_rc', value: await panels210[0].getValue() });
+              replay.push({ name: 'exempt_rental_rc', value: await panels210[0].getValue() });
+              replay.push({ name: 'limit_exempt_rental_rc', value: await panels210[0].getValue() });
+              replay.push({ name: 'ordinary_liquid_exercise', value: await panels210[0].getValue() });
+              replay.push({ name: 'loss_liquid_exercise_rc', value: await panels210[0].getValue() });
+              replay.push({ name: 'compasion_loss_capital_rental', value: await panels210[0].getValue() });
+              replay.push({ name: 'liquid_capital_rc', value: await panels210[0].getValue() });
+              /* Rentas no laborales */
+              replay.push({ name: 'total_income_rnl', value: await panels210[0].getValue() });
+              replay.push({ name: 'discount_refund', value: await panels210[0].getValue() });
+              replay.push({ name: 'income_not_constitutive_rental_rnl', value: await panels210[0].getValue() });
+              replay.push({ name: 'cost_expense_rnl', value: await panels210[0].getValue() });
+              replay.push({ name: 'liquid_rental_rnl', value: await panels210[0].getValue() });
+              replay.push({ name: 'not_labor_passive_liquid_rental', value: await panels210[0].getValue() });
+              replay.push({ name: 'rental_exempt_deduction_rnl', value: await panels210[0].getValue() });
+              replay.push({ name: 'limited_exempt_rental_rnl', value: await panels210[0].getValue() });
+              replay.push({ name: 'ordinary_liquid_rental_rnl', value: await panels210[0].getValue() });
+              replay.push({ name: 'loss_liquid_exercise_rnl', value: await panels210[0].getValue() });
+              replay.push({ name: 'not_work_liquid_rental', value: await panels210[0].getValue() });
+              /*Cédula general:  */
+              replay.push({ name: 'liquid_rental_cg', value: await panels210[0].getValue() });
+              replay.push({ name: 'rental_exempt_deduction_cg', value: await panels210[0].getValue() });
+              replay.push({ name: 'ordinaty_rental_cg', value: await panels210[0].getValue() });
+              replay.push({ name: 'compensation_lost_cg', value: await panels210[0].getValue() });
+              replay.push({ name: 'excess_compensation_cg', value: await panels210[0].getValue() });
+              replay.push({ name: 'taxable_rental', value: await panels210[0].getValue() });
+              replay.push({ name: 'liquid_rental_taxable_cg', value: await panels210[0].getValue() });
+              replay.push({ name: 'presumptive_rental_cg', value: await panels210[0].getValue() });
+              /*  Cédula de pensiones*/
+              replay.push({ name: 'total_income_rental_cp', value: await panels210[0].getValue() });
+              replay.push({ name: 'incomen_not_constitutive_rental_cp', value: await panels210[0].getValue() });
+              replay.push({ name: 'liquid_rental_cp', value: await panels210[0].getValue() });
+              replay.push({ name: 'liquid_rental_pension_cp', value: await panels210[0].getValue() });
+              /* Cédula de dividendos y participaciones */
+              replay.push({ name: 'dividend_participation_cdp', value: await panels210[0].getValue() });
+              replay.push({ name: 'not_constitutive_income_cdp', value: await panels210[0].getValue() });
+              replay.push({ name: 'ordinary_liquid_rental_cdp', value: await panels210[0].getValue() });
+              replay.push({ name: 'sub_cedula1', value: await panels210[0].getValue() });
+              replay.push({ name: 'sub_cedula2', value: await panels210[0].getValue() });
+              replay.push({ name: 'passive_liquid_rental_cdp', value: await panels210[0].getValue() });
+              replay.push({ name: 'exempt_rental_cdp', value: await panels210[0].getValue() });
+              /* Ganancia ocasional */
+              replay.push({ name: 'ingress_go', value: await panels210[0].getValue() });
+              replay.push({ name: 'cost_go', value: await panels210[0].getValue() });
+              replay.push({ name: 'go_not_taxed_exempt', value: await panels210[0].getValue() });
+              replay.push({ name: 'go_taxed', value: await panels210[0].getValue() });
+              replay.push({ name: 'general_pension', value: await panels210[0].getValue() });
+              replay.push({ name: 'presumptive_rental_pension', value: await panels210[0].getValue() });
+              replay.push({ name: 'participation_dividend_lp', value: await panels210[0].getValue() });
+              replay.push({ name: 'dividends_shares_2017_1', value: await panels210[0].getValue() });
+              replay.push({ name: 'dividends_shares_2017_2', value: await panels210[0].getValue() });
+              replay.push({ name: 'total_taxable_liquid_income', value: await panels210[0].getValue() });
+              replay.push({ name: 'donations', value: await panels210[0].getValue() });
+              replay.push({ name: 'others_private', value: await panels210[0].getValue() });
+              replay.push({ name: 'tax_discounts', value: await panels210[0].getValue() });
+              replay.push({ name: 'total_income_tax', value: await panels210[0].getValue() });
+              replay.push({ name: 'occasional_earnings_tax', value: await panels210[0].getValue() });
+              replay.push({ name: 'discount_taxes_occasional_income', value: await panels210[0].getValue() });
+              replay.push({ name: 'total_tax_charged', value: await panels210[0].getValue() });
+              replay.push({ name: 'advance_rental_liquid_year_taxable', value: await panels210[0].getValue() });
+              replay.push({ name: 'balance_favor_previous_taxable_year', value: await panels210[0].getValue() });
+              replay.push({ name: 'withholdings_taxable_year_to_report', value: await panels210[0].getValue() });
+              replay.push({ name: 'income_advance_following_taxable_year', value: await panels210[0].getValue() });
+              replay.push({ name: 'balance_pay_tax', value: await panels210[0].getValue() });
+              replay.push({ name: 'sanctions', value: await panels210[0].getValue() });
+              replay.push({ name: 'total_balance_pay', value: await panels210[0].getValue() });
+              replay.push({ name: 'total_balance_favor', value: await panels210[0].getValue() });
+              /* Firmas */
+              replay.push({ name: 'signatory_identification', value: await panels210[0].getValue() });
+              replay.push({ name: 'DV_firm', value: await panels210[0].getValue() });
+              replay.push({ name: 'dependent_document_type', value: await panels210[0].getValue() });
+              replay.push({ name: 'dependent_identification', value: await panels210[0].getValue() });
+              replay.push({ name: 'kinship', value: await panels210[0].getValue() });
+              replay.push({ name: 'disclaimer', value: await panels210[0].getValue() });
+              /*  Pago total*/
+              replay.push({ name: 'full_payment', value: await panels210[0].getValue() });
 
-              /* await servico(dv,nit,first_lastname,second_lastname,first_name,other_name,sectional_address_code,economic_activity); */
+              /* await servico(dv,nit,first_lastname,second_lastname,first_name,other_name,sectional_address_code,panels210); */
 
               console.log(replay)
               await browser.pause(500);
@@ -198,8 +306,8 @@ export class RentalDeclarationService {
 
         } else {
           throw new BadRequestException({
-            error: 'PANEL_FORM210_NOT_FOUND',
-            detail: 'El panel de Diligenciar y presentar Formulario 210 no se encontro.'
+            error: 'INCORRECT_CREDENTIALS_LOGIN',
+            detail: 'Credenciales incorrectas para iniciar sesión'
           });
         }
 

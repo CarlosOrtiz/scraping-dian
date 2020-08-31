@@ -78,7 +78,7 @@ exports.config = {
         //
         browserName: 'chrome',
         'goog:chromeOptions': {
-            'args': ['--start-maximized', '--silent', '--test-type', '--disable-dev-shm-usage'/* '--headless' */],
+            'args': ['--silent', '--test-type', '--disable-dev-shm-usage', /* '--headless' */],
             prefs: {
                 'directory_upgrade': true,
                 'prompt_for_download': false,

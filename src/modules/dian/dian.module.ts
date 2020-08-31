@@ -7,9 +7,17 @@ import { LoginService } from '../auth/services/login.service';
 import { ExogenousService } from './services/exogenous.service';
 import { RentalDeclarationService } from './services/rentalDeclaration.service';
 import { Audit } from '../../entities/security/audit.entity';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
+    BullModule.registerQueue({
+      name: 'dian',
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     TypeOrmModule.forFeature([Audit], 'security')
   ],
   providers: [

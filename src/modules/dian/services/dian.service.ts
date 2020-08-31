@@ -3,15 +3,23 @@ import { ExogenousRut } from '../dto/exogenousRut.dto';
 
 import { config } from '../../../../wdio.conf';
 import { remote } from 'webdriverio';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Audit } from '../../../entities/security/audit.entity';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 const path = require('path');
 
 @Injectable()
 export class DianService {
 
-  constructor() { }
+  constructor(
+    @InjectRepository(Audit, 'security') private readonly auditRepository: Repository<Audit>,
+    @InjectQueue('dian') private dianQueue: Queue
+  ) { }
 
-  async downloadExogenousRut1(body: ExogenousRut) {
+  async downloadExogenousRutVersionOld(body: ExogenousRut) {
     let browser;
     const downloadDir = path.join(__dirname, '../../../../src/modules/dian/files');
     const oldPath = path.join(__dirname, '../../../../../../');
@@ -23,7 +31,7 @@ export class DianService {
       return { error: 'PASSWORD_IS_NULL', detail: 'El campo de password se encuentra vacio.' }
     }
 
-    (async () => {
+    const response = (async () => {
       browser = await remote({
         logLevel: 'error', /* trace | debug | info | warn | error | silent */
         automationProtocol: 'devtools',
@@ -121,8 +129,10 @@ export class DianService {
       console.error(err)
       return browser.deleteSession()
     })
-  }
 
+    await this.dianQueue.add('downloadRutExogenous', response);
+
+  }
 
   async downloadExogenousRut(document: string, password: string) {
     let browser;
@@ -150,92 +160,111 @@ export class DianService {
       const loginForm = await browser.$('form > table[class="formulario_muisca"] > tbody > tr tr table');
       await browser.pause(1000);
 
-      if (typeof loginForm.isExisting() === 'undefined')
+      if (loginForm.isExisting()) {
+        await browser.pause(1000);
+        console.log('LOGIN... ✅');
+        const selectAll = await browser.$$('form > table[class="formulario_muisca"] tbody tr td select');
+        await selectAll[0].selectByAttribute('value', '2');   // typeUser
+        await selectAll[1].selectByAttribute('value', '13');  // typeDocument
+        await browser.pause(1000);
+
+        const credentials = await browser.$$('form > table tbody tr td input');
+        await credentials[0].isDisplayed();           // numberDocumentOrganization
+        await credentials[1].setValue(document);      // numberDocument
+        await credentials[2].setValue(password);      // password
+        await credentials[4].doubleClick();           // buttonLogin
+        console.log('VALIDATE LOGIN ✅');
+        await browser.pause(1000);
+        /* Open Dashboard*/
+        const dashboardForm = await browser.$$('form table input');
+        await browser.pause(500);
+
+        if (dashboardForm[13]) {
+          console.log('SUCCESSFULL LOGIN ✅');
+          console.log('DASHBOARD OPEN ✅');
+
+          await dashboardForm[13].doubleClick(); // download the RUT
+          await browser.pause(20000);
+
+          rut = { url: await dashboardForm[13].getHTML() }
+          console.log('RUT DOWNLOAD COMPLETED ✅');
+
+          if (dashboardForm[4].isExisting()) {
+
+            await browser.pause(1000);
+            await dashboardForm[4].doubleClick(); // Open information panel
+            console.log('OPEN PANEL INFORMATION EXOGENOUS ✅');
+            await browser.pause(1000);
+            exogenous = { url: await dashboardForm[4].getHTML() }
+
+            const acceptButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnBuscar"]');
+            await acceptButton.doubleClick()
+            await browser.pause(1000);
+
+            const selectYear = await browser.$('table > tbody > tr > td > select');
+            await selectYear.selectByAttribute('value', '2019');
+            await browser.pause(1000);
+
+            const queryButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnExogenaGenerar"]');
+            await queryButton.click()
+            await browser.pause(1000);
+
+            console.log('CLOSE PANEL INFORMATION EXOGENOUS ✅');
+
+            /* Logout Panel */
+            console.log('LOGOUT PANEL OPENED ✅')
+            if (dashboardForm[3]) {
+              await browser.pause(1000);
+              await dashboardForm[3].doubleClick(); // button logout
+              await browser.pause(500);
+
+              console.log('ENDED PROCESS✅');
+              await browser.deleteSession();
+            } else {
+              throw new BadRequestException({
+                error: 'LOGOUT_PANEL_NOT_FOUND',
+                detail: 'El panel de cerrar session no se logro encontrar'
+              });
+            }
+
+          } else {
+            throw new BadRequestException({
+              error: 'PANEL_INFORMATION_EXOGENOUS_NOT_FOUND',
+              detail: 'EL panel de información exógena no se encontro.'
+            });
+          }
+        } else {
+          throw new BadRequestException({
+            error: 'INCORRECT_CREDENTIALS_LOGIN',
+            detail: 'Credenciales incorrectas para iniciar sesión'
+          });
+        }
+      } else {
         throw new BadRequestException({
           error: 'FORM_LOGIN_NOT_FOUND',
           detail: 'EL formulario de la pagina del iniciar sesión no se encontro.'
-        });
-
-      await browser.pause(1000);
-      console.log('LOGIN... ✅');
-      const selectAll = await browser.$$('form > table[class="formulario_muisca"] tbody tr td select');
-      await selectAll[0].selectByAttribute('value', '2');   // typeUser
-      await selectAll[1].selectByAttribute('value', '13');  // typeDocument
-      await browser.pause(1000);
-
-      const credentials = await browser.$$('form > table tbody tr td input');
-      await credentials[0].isDisplayed();           // numberDocumentOrganization
-      await credentials[1].setValue(document);      // numberDocument
-      await credentials[2].setValue(password);      // password
-      await credentials[4].doubleClick();           // buttonLogin
-      console.log('SUCCESSFULL LOGIN ✅');
-      await browser.pause(1000);
-
-      /* Open Dashboard*/
-      const dashboardForm = await browser.$$('form table input');
-      await browser.pause(500);
-
-      if (dashboardForm[13].isExisting()) {
-        console.log('DASHBOARD OPEN ✅');
-
-        await dashboardForm[13].doubleClick(); // download the RUT
-        await browser.pause(20000);
-
-        rut = { url: await dashboardForm[13].getHTML() }
-        console.log('RUT DOWNLOAD COMPLETED ✅');
-
-        if (dashboardForm[4].isExisting()) {
-
-          await browser.pause(1000);
-          await dashboardForm[4].doubleClick(); // Open information panel
-          console.log('OPEN PANEL INFORMATION EXOGENOUS ✅');
-          await browser.pause(1000);
-          exogenous = { url: await dashboardForm[4].getHTML() }
-
-          const acceptButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnBuscar"]');
-          await acceptButton.doubleClick()
-          await browser.pause(1000);
-
-          const selectYear = await browser.$('table > tbody > tr > td > select');
-          await selectYear.selectByAttribute('value', '2019');
-          await browser.pause(1000);
-
-          const queryButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnExogenaGenerar"]');
-          await queryButton.click()
-          await browser.pause(1000);
-
-          console.log('CLOSE PANEL INFORMATION EXOGENOUS ✅');
-        } else {
-          throw new BadRequestException({
-            error: 'PANEL_NOT_FOUND',
-            detail: 'El panel de información exógena no se encontro.'
-          });
-        }
-        /* Logout Panel */
-        console.log('LOGOUT PANEL OPENED ✅')
-        await browser.pause(1000);
-        await dashboardForm[3].doubleClick(); // button logout
-        await browser.pause(500);
-
-        console.log('ENDED PROCESS✅');
-        await browser.deleteSession();
-      } else {
-        throw new BadRequestException({
-          error: 'DASHBOARD_NOT_FOUND',
-          detail: 'La pagina principal del administrador no se encontro.'
         });
       }
 
     } catch (err) {
       console.log(err)
-      await browser.deleteSession()
-      if (err.name == 'Error')
-        return { error: 'ERR_INTERNET_DISCONNECTED', detail: 'No tiene internet' }
+      if (err.response) {
+        await this.auditRepository.save({
+          name: err.response.error,
+          detail: err.response.detail,
+          user: document,
+          process: 'Descargar Rut y Información Exógena',
+          view: await browser.getUrl()
+        })
 
-      return err.response
+        await browser.deleteSession()
+        return err.response
+      } else {
+        await browser.deleteSession()
+        return err
+      }
     }
 
     return { success: 'OK', rut: rut, exogenous: exogenous }
-
   }
 }

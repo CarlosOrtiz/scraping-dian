@@ -16,19 +16,29 @@ export class DianController {
     private readonly rentalDeclarationService: RentalDeclarationService
   ) { }
 
-  @Get('/download/rut')
-  async downloadRut(@Query('document') document, @Query('password') password) {
-    return this.rutService.downloadRut(document, password);
+     @Get('/download/rut')
+    async downloadRut(@Query('document') document, @Query('password') password) {
+      return this.rutService.downloadRut(document, password);
+    }
+  
+ /*   @Post('/download/rut')
+    async downloadRutPost(@Body() body: ExogenousRut) {
+      return this.rutService.downloadRut(body.document, body.password);
+    } */
+
+  @Post('/download/exogenous')
+  async downloadExogenous(@Body() body: ExogenousRut) {
+    return this.dianService.downloadExogenousRutVersionOld(body);
   }
 
-  @Get('/download/exogenous')
-  async downloadExogenous(@Query('document') document, @Query('password') password) {
-    return this.exogenousService.downloadExogenous(document, password);
-  }
+  /*   @Get('/download/rut-exogenous')
+     async downloadRutExogenousGet(@Query('document') document, @Query('password') password) {
+       return this.dianService.downloadExogenousRut(document, password);
+     } */
 
-  @Get('/download/rut-exogenous')
-  async downloadRutExogenous(@Query('document') document, @Query('password') password) {
-    return this.dianService.downloadExogenousRut(document, password);
+  @Post('/download/rut-exogenous')
+  async downloadRutExogenousPost(@Body() body: ExogenousRut) {
+    return this.dianService.downloadExogenousRut(body.document, body.password);
   }
 
   @Post('rental-declaration')
