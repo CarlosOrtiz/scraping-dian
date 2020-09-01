@@ -11,17 +11,9 @@ import { DianModule } from './modules/dian/dian.module';
 import appConfig from './@common/config/app.config';
 import typeormConfig from './@common/config/typeorm.config';
 import dianConfig from './@common/config/dian.config';
-import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
-    BullModule.registerQueue({
-      name: 'dian',
-      redis: {
-        host: 'localhost',
-        port: 6379,
-      },
-    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

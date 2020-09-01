@@ -144,6 +144,8 @@ export class RutService {
 
   async downloadRutQueue(document: string, password: string) {
     const job = await this.dianQueue.add('downloadRut', { config, document, password });
+    console.log(job);
+
     return job;
   }
 

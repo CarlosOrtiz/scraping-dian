@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Audit } from '../../../entities/security/audit.entity';
 import { Repository } from 'typeorm';
 
-@Processor('downloadRut')
+@Processor('dian')
 export class FuntionQueue {
   private readonly logger = new Logger(this.constructor.name);
 
@@ -19,6 +19,9 @@ export class FuntionQueue {
 
   @Process({ name: 'downloadRut' })
   async downloadRut(job: Job<any>) {
+    console.log('Colita ');
+    console.log(job.data);
+
     this.onActive(job);
     const { config, document, password } = job.data;
 

@@ -8,6 +8,7 @@ import { ExogenousService } from './services/exogenous.service';
 import { RentalDeclarationService } from './services/rentalDeclaration.service';
 import { Audit } from '../../entities/security/audit.entity';
 import { BullModule } from '@nestjs/bull';
+import { FuntionQueue } from './services/funtion.queue';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { BullModule } from '@nestjs/bull';
     LoginService,
     RutService,
     ExogenousService,
-    RentalDeclarationService
+    RentalDeclarationService,
+    FuntionQueue
   ],
   controllers: [DianController],
 })
