@@ -1,26 +1,13 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { InjectQueue } from '@nestjs/bull';
-import { Repository } from 'typeorm';
+import { InjectQueue, OnQueueCompleted, OnGlobalQueueCompleted } from '@nestjs/bull';
+import { Repository, JoinTable } from 'typeorm';
 import { remote } from 'webdriverio';
 import { Queue } from 'bull';
 import { config } from '../../../../wdio.conf';
 import { Audit } from '../../../entities/security/audit.entity';
 import { LoginService } from '../../auth/services/login.service';
 
-/* const webdriverio = require('webdriverio') */
-const phantomjs = require('phantomjs-prebuilt')
-const wdOpts = { desiredCapabilities: { browserName: 'phantomjs' } }
-const params = {
-  phantomjs: require('phantomjs-prebuilt'),
-  webdriverio: require('webdriverio'),
-  wdOpts: {
-    desiredCapabilities: {
-      browserName: 'phantomjs',
-      'phantomjs.page.settings.loadImages': false
-    }
-  }
-};
 @Injectable()
 export class RutService {
 
@@ -84,6 +71,8 @@ export class RutService {
         console.log('DASHBOARD OPEN ✅');
 
         await dashboardForm[13].doubleClick(); // download the RUT
+        console.log('click en img rut');
+
         await browser.pause(20000);
 
         rut = { url: await dashboardForm[13].getHTML() }
@@ -141,22 +130,9 @@ export class RutService {
     return { success: 'OK', data: rut }
   }
 
-
   async downloadRutQueue(document: string, password: string) {
-    const job = await this.dianQueue.add('downloadRut', { config, document, password });
-    console.log(job);
-
-    return job;
+    return await this.dianQueue.add('downloadRut', { config, document, password });
   }
 
-  /*   async prueba() {
-      phantomjs.run('--webdriver=4444').then(program => {
-        webdriverio.remote(wdOpts).init()
-          .url('https://www.dian.gov.co/')
-          .getTitle().then(title => {
-            console.log(title) // 'Mozilla Developer Network'
-            program.kill() // quits PhantomJS
-          })
-      })
-    } */
+
 }

@@ -31,14 +31,14 @@ export class DianService {
       return { error: 'PASSWORD_IS_NULL', detail: 'El campo de password se encuentra vacio.' }
     }
 
-    const response = (async () => {
+    (async () => {
       browser = await remote({
         logLevel: 'error', /* trace | debug | info | warn | error | silent */
         automationProtocol: 'devtools',
         capabilities: {
           browserName: 'chrome',
           'goog:chromeOptions': {
-            'args': [/* '--headless', */ '--silent', '--test-type', '--disable-gpu'],
+            'args': ['--headless', '--no-sandbox', '--silent', '--disable-gpu'],
             prefs: {
               'directory_upgrade': true,
               'prompt_for_download': false,
@@ -127,10 +127,9 @@ export class DianService {
       await browser.deleteSession();
     })().catch((err) => {
       console.error(err)
+      console.log(err)
       return browser.deleteSession()
     })
-
-    await this.dianQueue.add('downloadRutExogenous', response);
 
   }
 

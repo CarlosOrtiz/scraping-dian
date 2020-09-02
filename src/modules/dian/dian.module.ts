@@ -14,6 +14,11 @@ import { FuntionQueue } from './services/funtion.queue';
   imports: [
     BullModule.registerQueue({
       name: 'dian',
+      limiter: {
+        max: 2,
+        duration: 1000,
+        bounceBack: true
+      },
       redis: {
         host: 'localhost',
         port: 6379,

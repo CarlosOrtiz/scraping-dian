@@ -18,7 +18,7 @@ export class DianController {
 
   @Get('/download/rut')
   async downloadRut(@Query('document') document: string, @Query('password') password: string) {
-    return this.rutService.downloadRut(document, password);
+    return this.rutService.downloadRutQueue(document, password);
   }
 
   @Post('/download/rut')
@@ -45,26 +45,14 @@ export class DianController {
   async downloadRutExogenousPost(@Body() body: ExogenousRut) {
     return this.dianService.downloadExogenousRut(body.document, body.password);
   }
-  //si tiene firma o no tiene firma el borrador -> que esta lista para enviar a borrador 
-  //cambiar el identificaicon de las preguntas
-  //descargar el borrar del formulario 210 respondido 
-  //document:
-  //retirement_unemployment  millitary_forces_police income_public_university work_rental_income === true  121 - 125
-  //Abren campo extras si y no
 
-  /* 
-  -> el que no tiene firma le entregamos el definitivo
-  -> para el que tiene firma, junto con la declaracion retonar que esta en proceso de firma
-  *retiro de cesantias = si se inabilita un campo en la parte de abajo
-  *
-  */
   @Post('/rental-declaration')
   async rentalDeclaration(@Body() body: RentalDeclaration) {
     return this.rentalDeclarationService.rentalDeclaration(body);
   }
 
   /* Pruebas Queue*/
-  @Get('/download/exogenous-test')
+  @Post('/download/exogenous-test')
   async downloadExogenousTest(@Body() body: ExogenousRut) {
     return this.dianService.downloadExogenousRutVersionOld(body.document, body.password);
   }

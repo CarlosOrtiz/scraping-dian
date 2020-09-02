@@ -1,12 +1,12 @@
-import { Processor, Process, OnQueueActive } from '@nestjs/bull';
-import { Job } from 'bull';
+import { Processor, Process, OnQueueActive, OnGlobalQueueCompleted, OnQueueCompleted } from '@nestjs/bull';
 import { Logger, BadRequestException } from '@nestjs/common';
-import { DianService } from './dian.service';
-import { remote } from 'webdriverio';
-
 import { InjectRepository } from '@nestjs/typeorm';
-import { Audit } from '../../../entities/security/audit.entity';
 import { Repository } from 'typeorm';
+import { Job } from 'bull';
+import { remote } from 'webdriverio';
+import { DianService } from './dian.service';
+import { Audit } from '../../../entities/security/audit.entity';
+const path = require('path');
 
 @Processor('dian')
 export class FuntionQueue {
@@ -19,12 +19,8 @@ export class FuntionQueue {
 
   @Process({ name: 'downloadRut' })
   async downloadRut(job: Job<any>) {
-    console.log('Colita ');
-    console.log(job.data);
-
-    this.onActive(job);
+    const downloadDir = path.join(__dirname, '../../../../src/modules/dian/files');
     const { config, document, password } = job.data;
-
     let browser;
 
     if (!document)
@@ -42,7 +38,20 @@ export class FuntionQueue {
     let rut;
 
     try {
-      browser = await remote(config);
+      browser = await remote({
+        logLevel: 'error', /* trace | debug | info | warn | error | silent */
+        automationProtocol: 'devtools',
+        capabilities: {
+          browserName: 'chrome',
+          'goog:chromeOptions': {
+            args: [],
+            prefs: {
+              'download.default_directory': '/home/caol/Documentos'
+            }
+          }
+        }
+      });
+      /*  browser = await remote(config); */
 
       console.log('URL ✅');
       await browser.url(`${process.env.DIAN_URL_BASE}`);
@@ -90,6 +99,7 @@ export class FuntionQueue {
         await browser.pause(500);
 
         console.log('ENDED PROCESS✅');
+        console.log(' ');
         await browser.deleteSession();
       } else {
         throw new BadRequestException({
@@ -97,7 +107,6 @@ export class FuntionQueue {
           detail: 'La pagina principal del administrador no se encontro.'
         });
       }
-
     } catch (err) {
       console.log(err)
       if (err.response) {
@@ -120,10 +129,16 @@ export class FuntionQueue {
     return { success: 'OK', data: rut }
   }
 
+  @OnGlobalQueueCompleted()
+  async onGlobalCompleted(jobId: number, result?: any) {
+    console.log('(Global) on completed: job ', jobId, ' -> result: ', result);
+    return { result };
+  }
+
   @OnQueueActive()
   onActive(job: Job) {
     console.log(
-      `Processing job ${job.id} of type ${job.name} with data ${job.data}...`,
+      `Processing job ${job.id} of funtion ${job.name}...`,
     );
   }
 }
