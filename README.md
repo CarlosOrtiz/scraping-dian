@@ -12,7 +12,7 @@
 $ npm install
 ```
 
-## Running the app
+## Comando para ejecutar la aplicación
 
 ```bash
 # watch mode
@@ -51,6 +51,33 @@ En este archivo se agregan constantes globales y accesibles.
 
 ```bash
 NODE_ENV=local
+APP_URL_PREFIX=v1
+PORT=4200
+
+JWT_KEY=mega_password
+JWT_EXPIRE=365d
+
+GCS_BUCKET= example-template
+
+DB_TYPE=postgres
+DB_HOST=ec2-3-217-87-84.compute-1.amazonaws.com
+DB_PORT=5432
+DB_DATABASE=d2or6bllh2jrl1
+DB_USERNAME=zhkazeqqdlvxcm
+DB_PASSWORD=56571f44b375abf3924765d03d6191f990c90c4d4afe16fc3dd2dbcfeeb0c2f1
+
+APP_HOST_SERVER=http://localhost
+APP_HOST_CLIENT=http://localhost:3010
+
+SENDGRID_API_KEY=api_key
+
+DIAN_USER=1117552597
+DIAN_PASSWORD=Caol9901
+DIAN_URL_BASE=https://muisca.dian.gov.co/WebArquitectura/DefLoginOld.faces
+
+REDIS_HOST=redis-17931.c52.us-east-1-4.ec2.cloud.redislabs.com
+REDIS_PORT=17931
+REDIS_PASSWORD=nAs6E9hmkY2Eo6V6Jlu0fDf5BEMQxAPA
 ```
 
 ## License
