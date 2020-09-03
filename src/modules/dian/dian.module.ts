@@ -1,38 +1,42 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DianController } from './dian.controller';
-import { RutService } from './services/rut.service';
-import { DianService } from './services/dian.service';
-import { LoginService } from '../auth/services/login.service';
-import { ExogenousService } from './services/exogenous.service';
-import { RentalDeclarationService } from './services/rentalDeclaration.service';
-import { Audit } from '../../entities/security/audit.entity';
 import { BullModule } from '@nestjs/bull';
-import { FuntionQueue } from './services/funtion.queue';
+import { DianController } from './dian.controller';
+import { DianService } from './services/dian.service';
+import { Audit } from '../../entities/security/audit.entity';
+import 'dotenv/config';
+import { ExogenousProcessor } from './processor/exogenous.processor';
+import { IncomeProcessor } from './processor/income.processor';
+import { RutProcessor } from './processor/rut.processor';
+import { RutExogenousProcessor } from './processor/rutExogenous.processor';
 
 @Module({
   imports: [
     BullModule.registerQueue({
       name: 'dian',
+      defaultJobOptions: {
+        removeOnComplete: true,
+        removeOnFail: true
+      },
       limiter: {
-        max: 2,
-        duration: 1000,
-        bounceBack: true
+        max: 10,
+        duration: 2500,
+        bounceBack: false
       },
       redis: {
-        host: 'localhost',
-        port: 6379,
+        host: process.env.REDIS_HOST,
+        port: +process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD
       },
     }),
     TypeOrmModule.forFeature([Audit], 'security')
   ],
   providers: [
     DianService,
-    LoginService,
-    RutService,
-    ExogenousService,
-    RentalDeclarationService,
-    FuntionQueue
+    ExogenousProcessor,
+    IncomeProcessor,
+    RutProcessor,
+    RutExogenousProcessor,
   ],
   controllers: [DianController],
 })

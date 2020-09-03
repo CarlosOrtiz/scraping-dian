@@ -1,4 +1,5 @@
 import { IsString, IsOptional, IsNotEmpty, IsBoolean, IsNumber } from 'class-validator';
+import { defaultMaxListeners } from 'keyv';
 
 export class RentalDeclaration {
 
@@ -9,454 +10,510 @@ export class RentalDeclaration {
   @IsString()
   password: string;
 
+  @IsNumber()
+  @IsNotEmpty({ message: 'El campo de año de la renta se encuentra vacio.' })
+  year_Rental_Declaration: number;
+
+  @IsNumber()
+  @IsNotEmpty({ message: `El indicativo para el año 2019 es el 16, para el año 2018 es el 14 y el año 2017 es el 13.` })
+  indicative: number;
+
   /* Pregunta Inicar Modal */
   @IsBoolean()
-  tax_resident: boolean;
+  tax_resident_1: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  severance_pay_2016_2: Boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  public_server_3: Boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  income_country_4: Boolean;
 
   /* Datos Declarante */
   @IsNumber()
   @IsOptional()
-  DV: number;
+  DV_6: number;
 
   @IsString()
   @IsOptional()
-  NIT: number;
+  NIT_5: number;
 
   @IsString()
   @IsOptional()
-  first_lastname: string;
+  first_lastname_7: string;
 
   @IsString()
   @IsOptional()
-  second_lastname: string;
+  second_lastname_8: string;
 
   @IsString()
   @IsOptional()
-  first_name: string;
+  first_name_9: string;
 
   @IsString()
   @IsOptional()
-  other_name: string;
+  other_name_10: string;
 
   @IsString()
   @IsOptional()
-  sectional_address_code: string;
+  sectional_address_code_12: string;
 
   @IsString()
   @IsOptional()
-  economic_activity: string;
+  economic_activity_24: string;
 
   @IsString()
   @IsOptional()
-  correction_code: string;
+  correction_code_25: string;
 
   @IsNumber()
   @IsOptional()
-  previous_from_number: number;
+  previous_from_number_26: number;
 
   /* Preguntas Si o No */
   @IsBoolean()
   @IsOptional()
-  income_country: boolean;
+  income_country_27: boolean;
 
   @IsBoolean()
   @IsOptional()
-  retirement_unemployment: boolean;
+  retirement_unemployment_113: boolean;  // esta pregunta sale en la modal del 2018 segunda pregunta
+
+  @IsNumber()
+  @IsOptional()
+  value_exempt_severance_pay_114: number;  //* 
 
   @IsBoolean()
   @IsOptional()
-  millitary_forces_police: boolean;
+  millitary_forces_police_115: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  include_exempt_value_basic_salary_116: Number;   //*
 
   @IsBoolean()
   @IsOptional()
-  compensation_insurance: boolean;
+  compensation_insurance_117: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  value_compensation_FFMM_118: Number; //*
 
   @IsBoolean()
   @IsOptional()
-  income_public_university: boolean;
+  income_public_university_119: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  value_public_university_120: number;
 
   @IsBoolean()
   @IsOptional()
-  public_servant: boolean;
+  public_servant_121: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  value_public_servant_122: number;
 
   @IsBoolean()
   @IsOptional()
-  hotel_rental_income: boolean;
+  hotel_rental_income_123: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  value_hotal_rental_124: number;
 
   @IsBoolean()
   @IsOptional()
-  work_rental_income: boolean;
+  work_rental_income_125: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  value_income_work_double_taxation_126: number;
 
   @IsBoolean()
   @IsOptional()
-  can_capital_income: boolean;
+  can_capital_income_127: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  value_income_capital_double_taxation_128: number;
 
   @IsBoolean()
   @IsOptional()
-  not_work_rental_income: boolean;
+  not_work_rental_income_129: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  can_not_labor_income_130: number;
 
 
   /* Patrimonio */
   @IsNumber()
   @IsOptional()
-  patrimony_total: number;
+  patrimony_total_28: number;
 
   @IsNumber()
   @IsOptional()
-  debt: number;
+  debt_29: number;
 
   @IsNumber()
   @IsOptional()
-  total_liquid_patrimonio: number;
+  total_liquid_patrimonio_30: number;
 
 
   /* Rentas de trabajo */
   @IsNumber()
   @IsOptional()
-  total_income_rental_work: number;
+  total_income_rental_work_31: number;
 
   @IsNumber()
   @IsOptional()
-  not_constitutive_income: number;
+  not_constitutive_income_32: number;
 
   @IsNumber()
   @IsOptional()
-  cost_deduction_rt: number;
+  cost_deduction_rt_33: number;
 
   @IsNumber()
   @IsOptional()
-  liquid_rental_rt: number;
+  liquid_rental_rt_34: number;
 
   @IsNumber()
   @IsOptional()
-  exempt_rental_rt: number;
+  exempt_rental_rt_35: number;
 
   @IsNumber()
   @IsOptional()
-  limit_rental_exempt_rt: number;
+  limit_rental_exempt_rt_36: number;
 
   @IsNumber()
   @IsOptional()
-  liquid_rental_work_rt: number;
+  liquid_rental_work_rt_37: number;
 
 
   /* Rentas de capital */
   @IsNumber()
   @IsOptional()
-  total_capital_income: number;
+  total_capital_income_38: number;
 
   @IsNumber()
   @IsOptional()
-  income_not_constitutive_rental: number;
+  income_not_constitutive_rental_39: number;
 
   @IsNumber()
   @IsOptional()
-  cost_deduction_coming: number;
+  cost_deduction_coming_40: number;
 
   @IsNumber()
   @IsOptional()
-  liquid_rental_rc: number;
+  liquid_rental_rc_41: number;
   //43 El valor de la casilla 43 no puede superar 0. (CASILLA 38 + CASILLA 42 - CASILLA 39 - CASILLA 40)
   //39 El valor de la casilla 64 más la casilla 65 no puede superar el valor de la casilla 63.
   @IsNumber()
   @IsOptional()
-  liquid_rental_passive_rc: number;
+  liquid_rental_passive_rc_42: number;
 
   @IsNumber()
   @IsOptional()
-  exempt_rental_rc: number;
+  exempt_rental_rc_43: number;
 
   @IsNumber()
   @IsOptional()
-  limit_exempt_rental_rc: number;
+  limit_exempt_rental_rc_44: number;
 
   @IsNumber()
   @IsOptional()
-  ordinary_liquid_exercise: number;
+  ordinary_liquid_exercise_45: number;
   //47 = El valor de la casilla 64 más la casilla 65 no puede superar el valor de la casilla 63.
   @IsNumber()
   @IsOptional()
-  loss_liquid_exercise_rc: number;
+  loss_liquid_exercise_rc_46: number;
 
   @IsNumber()
   @IsOptional()
-  compasion_loss_capital_rental: number;
+  compasion_loss_capital_rental_47: number;
 
   @IsNumber()
   @IsOptional()
-  liquid_capital_rc: number;
+  liquid_capital_rc_48: number;
 
 
   /* Rentas no laborales */
   @IsNumber()
   @IsOptional()
-  total_income_rnl: number;
+  total_income_rnl_49: number;
 
   @IsNumber()
   @IsOptional()
-  discount_refund: number;
+  discount_refund_50: number;
 
   @IsNumber()
   @IsOptional()
-  income_not_constitutive_rental_rnl: number;
+  income_not_constitutive_rental_rnl_51: number;
 
   @IsNumber()
   @IsOptional()
-  cost_expense_rnl: number;
+  cost_expense_rnl_52: number;
 
   @IsNumber()
   @IsOptional()
-  liquid_rental_rnl: number; //Renta líquida:
+  liquid_rental_rnl_53: number; //Renta líquida:
 
   @IsNumber()
   @IsOptional()
-  not_labor_passive_liquid_rental: number;
+  not_labor_passive_liquid_rental_54: number;
 
   @IsNumber()
   @IsOptional()
-  rental_exempt_deduction_rnl: number;
+  rental_exempt_deduction_rnl_55: number;
 
   @IsNumber()
   @IsOptional()
-  limited_exempt_rental_rnl: number;
+  limited_exempt_rental_rnl_56: number;
 
   @IsNumber()
   @IsOptional()
-  ordinary_liquid_rental_rnl: number;
+  ordinary_liquid_rental_rnl_57: number;
 
   @IsNumber()
   @IsOptional()
-  loss_liquid_exercise_rnl: number;
+  loss_liquid_exercise_rnl_58: number;
 
   @IsNumber()
   @IsOptional()
-  compensation_loss_rental_rnl: number;
+  compensation_loss_rental_rnl_59: number;
 
   @IsNumber()
   @IsOptional()
-  not_work_liquid_rental: number;
+  not_work_liquid_rental_60: number;
 
 
   /*Cédula general:  */
   @IsNumber()
   @IsOptional()
-  liquid_rental_cg: number;
+  liquid_rental_cg_61: number;
 
   @IsNumber()
   @IsOptional()
-  rental_exempt_deduction_cg: number;
+  rental_exempt_deduction_cg_62: number;
 
   @IsNumber()
   @IsOptional()
-  ordinaty_rental_cg: number;
+  ordinaty_rental_cg_63: number;
 
   @IsNumber()
   @IsOptional()
-  compensation_lost_cg: number;
+  compensation_lost_cg_64: number;
 
   @IsNumber()
   @IsOptional()
-  excess_compensation_cg: number;
+  excess_compensation_cg_65: number;
 
   @IsNumber()
   @IsOptional()
-  taxable_rental: number;
+  taxable_rental_66: number;
 
   @IsNumber()
   @IsOptional()
-  liquid_rental_taxable_cg: number;
+  liquid_rental_taxable_cg_67: number;
 
   @IsNumber()
   @IsOptional()
-  presumptive_rental_cg: number;
+  presumptive_rental_cg_68: number;
 
 
   /*  Cédula de pensiones*/
   @IsNumber()
   @IsOptional()
-  total_income_rental_cp: number;
+  total_income_rental_cp_69: number;
 
   @IsNumber()
   @IsOptional()
-  incomen_not_constitutive_rental_cp: number;
+  incomen_not_constitutive_rental_cp_70: number;
 
   @IsNumber()
   @IsOptional()
-  liquid_rental_cp: number;
+  liquid_rental_cp_71: number;
 
   @IsNumber()
   @IsOptional()
-  pension_exempt_rental_cp: number;
+  pension_exempt_rental_cp_72: number;
 
   @IsNumber()
   @IsOptional()
-  liquid_rental_pension_cp: number;
+  liquid_rental_pension_cp_73: number;
 
 
   /* Cédula de dividendos y participaciones */
   @IsNumber()
   @IsOptional()
-  dividend_participation_cdp: number;
+  dividend_participation_cdp_74: number;
 
   @IsNumber()
   @IsOptional()
-  not_constitutive_income_cdp: number;
+  not_constitutive_income_cdp_75: number;
 
   @IsNumber()
   @IsOptional()
-  ordinary_liquid_rental_cdp: number;
+  ordinary_liquid_rental_cdp_76: number;
 
   @IsNumber()
   @IsOptional()
-  sub_cedula1: number;
+  sub_cedula1_77: number;
 
   @IsNumber()
   @IsOptional()
-  sub_cedula2: number;
+  sub_cedula2_78: number;
 
   @IsNumber()
   @IsOptional()
-  passive_liquid_rental_cdp: number;
+  passive_liquid_rental_cdp_79: number;
 
   @IsNumber()
   @IsOptional()
-  exempt_rental_cdp: number;
+  exempt_rental_cdp_80: number;
 
 
   /* Ganancia ocasional */
   @IsNumber()
   @IsOptional()
-  ingress_go: number;
+  ingress_go_81: number;
 
   @IsNumber()
   @IsOptional()
-  cost_go: number;
+  cost_go_82: number;
 
   @IsNumber()
   @IsOptional()
-  go_not_taxed_exempt: number;
+  go_not_taxed_exempt_83: number;
 
   @IsNumber()
   @IsOptional()
-  go_taxed: number;
+  go_taxed_84: number;
 
   /*  Liquidación privada*/
   @IsNumber()
   @IsOptional()
-  general_pension: number;
+  general_pension_85: number;
 
   @IsNumber()
   @IsOptional()
-  presumptive_rental_pension: number;
+  presumptive_rental_pension_86: number;
 
   @IsNumber()
   @IsOptional()
-  participation_dividend_lp: number;
+  participation_dividend_lp_87: number;
 
   @IsOptional()
   @IsNumber()
-  dividends_shares_2017_1: number;
+  dividends_shares_2017_1_88: number;
 
   @IsOptional()
   @IsNumber()
-  dividends_shares_2017_2: number;
+  dividends_shares_2017_2_89: number;
 
   @IsOptional()
   @IsNumber()
-  total_taxable_liquid_income: number;
+  total_taxable_liquid_income_90: number;
 
   @IsOptional()
   @IsNumber()
-  taxes_paid_abroad: number;
+  taxes_paid_abroad_91: number;
 
   @IsOptional()
   @IsNumber()
-  donations: number;
+  donations_92: number;
 
   @IsOptional()
   @IsNumber()
-  others_private: number;
+  others_private_93: number;
 
   @IsOptional()
   @IsNumber()
-  tax_discounts: number;
+  tax_discounts_94: number;
 
   @IsOptional()
   @IsNumber()
-  total_income_tax: number;
+  total_income_tax_95: number;
 
   @IsOptional()
   @IsNumber()
-  occasional_earnings_tax: number;
+  occasional_earnings_tax_96: number;
 
   @IsOptional()
   @IsNumber()
-  discount_taxes_occasional_income: number;
+  discount_taxes_occasional_income_97: number;
 
   @IsOptional()
   @IsNumber()
-  total_tax_charged: number;
+  total_tax_charged_98: number;
 
   @IsOptional()
   @IsNumber()
-  advance_rental_liquid_year_taxable: number;
+  advance_rental_liquid_year_taxable_99: number;
 
   @IsOptional()
   @IsNumber()
-  balance_favor_previous_taxable_year: number;
+  balance_favor_previous_taxable_year_100: number;
 
   @IsOptional()
   @IsNumber()
-  withholdings_taxable_year_to_report: number;
+  withholdings_taxable_year_to_report_101: number;
 
   @IsOptional()
   @IsNumber()
-  income_advance_following_taxable_year: number;
+  income_advance_following_taxable_year_102: number;
 
   @IsOptional()
   @IsNumber()
-  balance_pay_tax: number;
+  balance_pay_tax_103: number;
 
   @IsOptional()
   @IsNumber()
-  sanctions: number;
+  sanctions_104: number;
 
   @IsOptional()
   @IsNumber()
-  total_balance_pay: number;
+  total_balance_pay_105: number;
 
   @IsOptional()
   @IsNumber()
-  total_balance_favor: number;
+  total_balance_favor_106: number;
 
   /* Firmas */
   @IsNumber()
   @IsOptional()
-  signatory_identification: number;
+  signatory_identification_107: number;
 
   @IsNumber()
   @IsOptional()
-  DV_firm: number;
+  DV_firm_108: number;
 
   @IsString()
   @IsOptional()
-  dependent_document_type: string;
+  dependent_document_type_109: string;
 
   @IsNumber()
   @IsOptional()
-  dependent_identification: number;
+  dependent_identification_110: number;
 
   @IsString()
   @IsOptional()
-  kinship: string;
+  kinship_112: string;
 
   @IsBoolean()
   @IsOptional()
-  disclaimer: Boolean;
+  disclaimer_994: Boolean;
 
   /*  Pago total*/
   @IsNumber()
   @IsOptional()
-  full_payment: number;
+  full_payment_980: number;
 
 }
