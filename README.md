@@ -15,8 +15,7 @@ $ npm install
 ## Comando para ejecutar la aplicación
 
 ```bash
-# watch mode
-$ npm run start:dev
+npm run start:dev
 ```
 ## Crear un archivo con la siguente extención .env para las varibles de entorno
 #### .env
