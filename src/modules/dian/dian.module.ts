@@ -4,11 +4,11 @@ import { BullModule } from '@nestjs/bull';
 import { DianController } from './dian.controller';
 import { DianService } from './services/dian.service';
 import { Audit } from '../../entities/security/audit.entity';
-import 'dotenv/config';
 import { ExogenousProcessor } from './processor/exogenous.processor';
 import { IncomeProcessor } from './processor/income.processor';
 import { RutProcessor } from './processor/rut.processor';
 import { RutExogenousProcessor } from './processor/rutExogenous.processor';
+import 'dotenv/config';
 
 @Module({
   imports: [
