@@ -11,13 +11,15 @@ import { DianModule } from './modules/dian/dian.module';
 import appConfig from './@common/config/app.config';
 import typeormConfig from './@common/config/typeorm.config';
 import dianConfig from './@common/config/dian.config';
+import redisConfig from './@common/config/redis.config';
+
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [appConfig, typeormConfig, dianConfig]
+      load: [appConfig, typeormConfig, dianConfig, redisConfig]
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],

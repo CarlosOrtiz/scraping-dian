@@ -80,12 +80,12 @@ exports.config = {
         //
         browserName: 'chrome',
         'goog:chromeOptions': {
-            args: ['--headless', '--no-sandbox', '--silent', '--disable-gpu'],
+            args: ['--disable-popup-blocking', '-incognito', /* '--headless',  '--no-sandbox',*/ '--silent', /* '--disable-gpu' */],
         },
         prefs: {
             'directory_upgrade': true,
             'prompt_for_download': false,
-            'download.default_directory': __dirname
+            'default_directory': __dirname
         },
         acceptInsecureCerts: true,
     },
@@ -100,7 +100,7 @@ exports.config = {
     // Define all options that are relevant for the WebdriverIO instance here
     //
     // Level of logging verbosity: trace | debug | info | warn | error | silent
-    logLevel: 'error',
+    logLevel: 'info',
     //
     // Set specific log levels per logger
     // loggers:
