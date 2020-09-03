@@ -19,7 +19,7 @@ import 'dotenv/config';
         removeOnFail: true
       },
       limiter: {
-        max: 10,
+        max: 5,
         duration: 2500,
         bounceBack: false
       },
