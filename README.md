@@ -2,28 +2,6 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
 </p>
 
-[travis-image]: https://api.travis-ci.org/nestjs/nest.svg?branch=master
-[travis-url]: https://travis-ci.org/nestjs/nest
-[linux-image]: https://img.shields.io/travis/nestjs/nest/master.svg?label=linux
-[linux-url]: https://travis-ci.org/nestjs/nest
-  
-  <p align="center">A progressive <a href="http://nodejs.org" target="blank">Node.js</a> framework for building efficient and scalable server-side applications, heavily inspired by <a href="https://angular.io" target="blank">Angular</a>.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/dm/@nestjs/core.svg" alt="NPM Downloads" /></a>
-<a href="https://travis-ci.org/nestjs/nest"><img src="https://api.travis-ci.org/nestjs/nest.svg?branch=master" alt="Travis" /></a>
-<a href="https://travis-ci.org/nestjs/nest"><img src="https://img.shields.io/travis/nestjs/nest/master.svg?label=linux" alt="Linux" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#5" alt="Coverage" /></a>
-<a href="https://gitter.im/nestjs/nestjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge"><img src="https://badges.gitter.im/nestjs/nestjs.svg" alt="Gitter" /></a>
-<a href="https://opencollective.com/nest#backer"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec"><img src="https://img.shields.io/badge/Donate-PayPal-dc3d53.svg"/></a>
-  <a href="https://twitter.com/nestframework"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
@@ -37,38 +15,43 @@ $ npm install
 ## Running the app
 
 ```bash
-# development
-$ npm run start
-
 # watch mode
 $ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
+## Crear un archivo con la siguente extención .env para las varibles de entorno
+#### .env
 
-## Test
+En este archivo se agregan constantes globales y accesibles.
+
+| Constante                | Tipo    | Valor     
+| ------------------------ | --------|  ---------------------------------------------------------------------------------------
+| *NODE_ENV*	 	       | `String`  | local
+| *APP_URL_PREFIX*	 	 | `String`  | v1
+| *PORT*	 	           | `String`  | 4200
+| *JWT_KEY*	 	         | `String`  | mega_password
+| *JWT_EXPIRE*	 	     | `String`  | 365d
+| *GCS_BUCKET*	 	     | `String`  | example-template
+| *DB_TYPE*	 	         | `String`  | postgres
+| *DB_HOST*	 	         | `String`  | ec2-3-217-87-84.compute-1.amazonaws.com
+| *DB_PORT*	 	         | `String`  | 5432
+| *DB_DATABASE*	 	     | `String`  | d2or6bllh2jrl1
+| *DB_USERNAME*	 	     | `String`  | zhkazeqqdlvxcm
+| *DB_PASSWORD*	 	     | `String`  | 56571f44b375abf3924765d03d6191f990c90c4d4afe16fc3dd2dbcfeeb0c2f1
+| *APP_HOST_SERVER*	 	 | `String`  | http://localhost
+| *APP_HOST_CLIENT*    | `String`  | http://localhost:3010
+| *SENDGRID_API_KEY*   | `String`  | api_key
+| *DIAN_USER*          | `String`  | 
+| *DIAN_PASSWORD*      | `String`  | 
+| *DIAN_URL_BASE*      | `String`  | https://muisca.dian.gov.co/WebArquitectura/DefLoginOld.faces
+| *REDIS_HOST*         | `String`  | redis-17931.c52.us-east-1-4.ec2.cloud.redislabs.com
+| *REDIS_PORT*         | `String`  | 17931
+| *REDIS_PASSWORD*     | `String`  | nAs6E9hmkY2Eo6V6Jlu0fDf5BEMQxAPA
+
+## Ejemplo práctico de como debería de quedar la primera varible de entorno
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+NODE_ENV=local
 ```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
 
 ## License
 
