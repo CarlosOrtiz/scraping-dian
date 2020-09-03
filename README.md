@@ -6,13 +6,21 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Installation
+## Instalación
 
+#### 1.Tener el navegador Google Chrome instalado, si no cuenta con este, el siguente link es para descargarlo
 ```bash
-$ npm install
+https://www.google.com/intl/es/chrome/
 ```
+#### 2.Tener instalado NodeJs, el siguente link es directo para descargarlo
+```bash
+#Windows
+https://nodejs.org/dist/v12.18.3/node-v12.18.3-x86.msi
 
-## Comando para ejecutar la aplicación
+#MacOS
+https://nodejs.org/dist/v12.18.3/node-v12.18.3.pkg
+```
+#### 3. Abril la terminal ejecutar el siguente comando en el directorio del repositorio
 
 ```bash
 npm run start:dev
