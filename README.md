@@ -25,6 +25,7 @@ https://nodejs.org/dist/v12.18.3/node-v12.18.3.pkg
 ```bash
 npm run start:dev
 ```
+
 ## Crear un archivo con la siguente extención .env para las varibles de entorno
 #### .env
 
@@ -55,6 +56,7 @@ En este archivo se agregan constantes globales y accesibles.
 | *REDIS_PASSWORD*     | `String`  | nAs6E9hmkY2Eo6V6Jlu0fDf5BEMQxAPA
 
 ## Ejemplo práctico de como debería de quedar la primera varible de entorno
+#### Las varibles de entorno REDIS_HOST,REDIS_PORT y REDIS_PASSWORD estamos usando redis, pero no hay necesidad de tenerlo instlado localmente ya que, actualmente lo unamos redis desde la cloud of heroku
 
 ```bash
 NODE_ENV=local
