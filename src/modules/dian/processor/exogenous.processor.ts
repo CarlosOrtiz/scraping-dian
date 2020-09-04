@@ -1,8 +1,8 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { Logger, BadRequestException } from "@nestjs/common";
-import { Processor, Process, OnGlobalQueueCompleted, OnGlobalQueueActive, OnGlobalQueueProgress, OnQueueActive, OnQueueProgress } from "@nestjs/bull";
+import { Processor, Process, OnGlobalQueueCompleted, OnGlobalQueueActive, OnGlobalQueueProgress, OnQueueActive, OnQueueProgress, InjectQueue, OnQueueCompleted } from "@nestjs/bull";
 import { Repository } from "typeorm";
-import { Job } from "bull";
+import { Job, Queue } from "bull";
 import { remote } from "webdriverio";
 import { config } from '../../../../wdio.conf';
 import { Audit } from "../../../entities/security/audit.entity";
@@ -13,6 +13,7 @@ export class ExogenousProcessor {
 
   constructor(
     @InjectRepository(Audit, 'security') private readonly auditRepository: Repository<Audit>,
+    @InjectQueue('dian') private dianQueue: Queue
   ) { }
 
   @Process({ name: 'downloadExogenous' })
@@ -38,7 +39,7 @@ export class ExogenousProcessor {
       browser = await remote(config);
       console.log('URL ✅');
       await browser.url(`${process.env.DIAN_URL_BASE}`);
-      /*  await browser.throttle('Regular2G'); */
+      await browser.throttle('Regular2G');
 
       const loginForm = await browser.$('form > table[class="formulario_muisca"] > tbody > tr tr table');
       await browser.pause(1000);
@@ -172,20 +173,15 @@ export class ExogenousProcessor {
     return { success: 'OK', data: exogenous }
   }
 
-  @OnGlobalQueueCompleted()
-  async onGlobalCompleted(jobId: number, result: any) {
-    console.log('On completed: job ', jobId, ' -> result: ', await result);
+  @OnQueueCompleted()
+  onGlobalCompleted(job: Job, result: any) {
+    console.log('On completed: job ', job.id, ' -> result: ', result);
   }
-
-  /*  @OnGlobalQueueActive()
-   onActive(job: Job) {
-     console.log(`Processing job ${job.id} of funtion ${job.name}...`);
-   } */
 
   @OnQueueActive()
   onActive(job: Job) {
     console.log(
-      `Processing job ${job.id} of funtion ${job.name}...`,
+      `Processing job ${job.id} of type ${job.name}...`,
     );
   }
 

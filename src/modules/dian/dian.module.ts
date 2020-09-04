@@ -19,9 +19,9 @@ import 'dotenv/config';
         removeOnFail: true
       },
       limiter: {
-        max: 5,
-        duration: 2500,
-        bounceBack: false
+        max: 3,
+        duration: 5000,
+        bounceBack: true
       },
       redis: {
         host: process.env.REDIS_HOST,

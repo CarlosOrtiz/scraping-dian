@@ -35,7 +35,7 @@ export class DianService {
   }
 
   async rentalDeclaration(body: RentalDeclaration) {
-    return await this.dianQueue.add('rentalDeclaration', { body }, { priority: 1 });
+    return await this.dianQueue.add('rentalDeclaration', { body }, { priority: 1 })
   }
 
   async moveFiles(pathOriginal, newPath, nameArchive) {

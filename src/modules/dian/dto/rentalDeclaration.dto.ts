@@ -1,13 +1,14 @@
 import { IsString, IsOptional, IsNotEmpty, IsBoolean, IsNumber } from 'class-validator';
-import { defaultMaxListeners } from 'keyv';
 
 export class RentalDeclaration {
 
   /* Datos Iniciar sesión */
   @IsString()
+  @IsNotEmpty({ message: 'El campo para el número de documento se encuentra vacio -> document' })
   document: string;
 
   @IsString()
+  @IsNotEmpty({ message: 'El campo de para la contraseña de encuentra vacio -> password' })
   password: string;
 
   @IsNumber()
@@ -15,7 +16,7 @@ export class RentalDeclaration {
   year_Rental_Declaration: number;
 
   @IsNumber()
-  @IsNotEmpty({ message: `El indicativo para el año 2019 es el 16, para el año 2018 es el 14 y el año 2017 es el 13.` })
+  @IsNotEmpty({ message: `El indicativo se encuentra vacio` })
   indicative: number;
 
   /* Pregunta Inicar Modal */
@@ -86,7 +87,7 @@ export class RentalDeclaration {
 
   @IsNumber()
   @IsOptional()
-  value_exempt_severance_pay_114: number;  //* 
+  response_retirement_unemployment_114: number;  //* 
 
   @IsBoolean()
   @IsOptional()
@@ -94,7 +95,7 @@ export class RentalDeclaration {
 
   @IsNumber()
   @IsOptional()
-  include_exempt_value_basic_salary_116: Number;   //*
+  response_millitary_forces_police_116: Number;   //*
 
   @IsBoolean()
   @IsOptional()
@@ -102,7 +103,7 @@ export class RentalDeclaration {
 
   @IsNumber()
   @IsOptional()
-  value_compensation_FFMM_118: Number; //*
+  response_compensation_insurance_118: Number; //*
 
   @IsBoolean()
   @IsOptional()
@@ -110,7 +111,7 @@ export class RentalDeclaration {
 
   @IsNumber()
   @IsOptional()
-  value_public_university_120: number;
+  response_income_public_university_120: number;
 
   @IsBoolean()
   @IsOptional()
@@ -118,7 +119,7 @@ export class RentalDeclaration {
 
   @IsNumber()
   @IsOptional()
-  value_public_servant_122: number;
+  response_public_servant_122: number;
 
   @IsBoolean()
   @IsOptional()
@@ -126,7 +127,7 @@ export class RentalDeclaration {
 
   @IsNumber()
   @IsOptional()
-  value_hotal_rental_124: number;
+  response_hotel_rental_income_124: number;
 
   @IsBoolean()
   @IsOptional()
@@ -134,7 +135,7 @@ export class RentalDeclaration {
 
   @IsNumber()
   @IsOptional()
-  value_income_work_double_taxation_126: number;
+  response_work_rental_income_126: number;
 
   @IsBoolean()
   @IsOptional()
@@ -142,7 +143,7 @@ export class RentalDeclaration {
 
   @IsNumber()
   @IsOptional()
-  value_income_capital_double_taxation_128: number;
+  response_can_capital_income_128: number;
 
   @IsBoolean()
   @IsOptional()
@@ -150,7 +151,7 @@ export class RentalDeclaration {
 
   @IsNumber()
   @IsOptional()
-  can_not_labor_income_130: number;
+  response_not_work_rental_income_130: number;
 
 
   /* Patrimonio */
