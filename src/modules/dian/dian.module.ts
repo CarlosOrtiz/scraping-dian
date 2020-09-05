@@ -19,8 +19,8 @@ import 'dotenv/config';
         removeOnFail: true
       },
       limiter: {
-        max: 3,
-        duration: 5000,
+        max: 1,
+        duration: 1000,
         bounceBack: true
       },
       redis: {

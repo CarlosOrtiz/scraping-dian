@@ -9,7 +9,7 @@ import { Audit } from "../../../entities/security/audit.entity";
 
 @Processor('dian')
 export class IncomeProcessor {
-  private readonly logger = new Logger(this.constructor.name);
+  private readonly logger = new Logger(IncomeProcessor.name);
   constructor(
     @InjectRepository(Audit, 'security') private readonly auditRepository: Repository<Audit>,
   ) { }
@@ -79,7 +79,7 @@ export class IncomeProcessor {
           console.log('FORM 210 OPEN ✅');
           await browser.navigateTo(`https://muisca.dian.gov.co/WebFormRenta210v${body.indicative}/?concepto=inicial&anio=${body.year_Rental_Declaration}&periodicidad=anual&periodo=1`);
           const isPopupQuestionFrom = await browser.$('div mat-card div[class="mat-dialog-content"] div');
-          const popupQuestionFromItem = await isPopupQuestionFrom.$$('mat-card-content div mat-radio-button input');
+          const popupQuestionFromItem = await isPopupQuestionFrom.$$('mat-card-content div mat-radio-button input[type="radio"');
 
           if (isPopupQuestionFrom) {
             if (body.year_Rental_Declaration === 2019) {
@@ -708,8 +708,135 @@ export class IncomeProcessor {
                             detail: 'No se logro seleccionar la pregunta 1.'
                           });
                         } */
-            } else {
-              const tax_resident_1 = body.tax_resident_1 === true ? await popupQuestionFromItem[0] : await popupQuestionFromItem[1]
+            } else if (body.year_Rental_Declaration === 2017) {
+              await browser.navigateTo('https://muisca.dian.gov.co/WebDilIngresoFormRenta210');
+              await browser.refresh()
+              await browser.pause(2000);
+
+              const buttonAll = await browser.$$('div ingreso > div button');
+              await browser.pause(1000);
+              if (buttonAll) {
+                /* console.log(await buttonAll[0].isClickable()); */
+                await buttonAll[0].click(); // DESCARGAR 2017
+
+                const menuYear = await browser.$$('div[class="mat-menu-content ng-trigger ng-trigger-fadeInItems"] button')
+                await menuYear[2].click();
+                await browser.pause(4000);
+
+                await buttonAll[4].click(); // DESCARGAR 2017
+                await browser.pause(3000);
+                const popupQuestionFromItem2 = await browser.$$('div mat-card div[class="mat-dialog-content"] div mat-card-content div mat-radio-button input[type="radio"]')
+                await browser.pause(3000);
+
+                const tax_resident_1 = body.tax_resident_1 === true ? await popupQuestionFromItem2[0] : await popupQuestionFromItem2[1]
+                console.log(await tax_resident_1)
+                await browser.pause(3000);
+                const severance_pay_2016_2 = body.severance_pay_2016_2 === true ? await popupQuestionFromItem2[2] : await popupQuestionFromItem2[3]
+                await browser.pause(3000);
+                const public_server_3 = body.public_server_3 === true ? await popupQuestionFromItem2[4] : await popupQuestionFromItem2[5]
+                await browser.pause(3000);
+                const income_country_4 = body.income_country_4 === true ? await popupQuestionFromItem2[6] : await popupQuestionFromItem2[7]
+                await browser.pause(3000);
+
+                await tax_resident_1.doubleClick();
+                await browser.pause(3000);
+
+                if (tax_resident_1.isExisting()) {
+
+                } else {
+                  throw new BadRequestException({
+                    error: 'NOT_SELECT_QUESTION_UNE',
+                    detail: 'No se logro seleccionar la pregunta 1.'
+                  });
+                }
+                await browser.pause(3000);
+
+                if (severance_pay_2016_2.isExisting()) {
+                  await severance_pay_2016_2.click();
+                  await browser.pause(3500);
+
+                } else {
+                  throw new BadRequestException({
+                    error: 'NOT_SELECT_QUESTION_TWO',
+                    detail: 'No se logro seleccionar la pregunta 2.'
+                  });
+                }
+                await browser.pause(3000);
+
+                if (public_server_3.isExisting()) {
+                  await public_server_3.doubleClick();
+                  await browser.pause(3500);
+
+                } else {
+                  throw new BadRequestException({
+                    error: 'NOT_SELECT_QUESTION_THREE',
+                    detail: 'No se logro seleccionar la pregunta 3.'
+                  });
+                }
+                await browser.pause(3000);
+
+                if (income_country_4.isExisting()) {
+                  await income_country_4.doubleClick();
+                  await browser.pause(3000);
+
+                } else {
+                  throw new BadRequestException({
+                    error: 'NOT_SELECT_QUESTION_FOUR',
+                    detail: 'No se logro seleccionar la pregunta 4.'
+                  });
+                }
+                await browser.pause(3000);
+
+                const send = await browser.$('div[class="mat-dialog-actions"] div button[class="mat-button"]');
+                await send.doubleClick(); // click al botton enviar
+                await browser.pause(2000);
+
+                const inputText = await browser.$$('form div div div div input');
+                await browser.pause(3000);
+
+                if (inputText[0]) {
+                  const panelBUttonSave = await browser.$$('div[class="fixed-action-btn click-to-toggle"] a')
+                  if (panelBUttonSave[1]) {
+
+                    const buttonSave = await browser.$$('button[class="btn-floating no-shadown mat-fab mat-primary"]');
+                    await browser.pause(3000);
+
+                    if (await buttonSave.length === 3) {
+                      await buttonSave[0].click(); // DESCARGAR
+                      await browser.pause(3500);
+                    }
+                  } else {
+                    throw new BadRequestException({
+                      error: 'PANEL_SAVE_RENTAL_NOT_FOUND',
+                      detail: 'El panel para guardar la informacion de la declaracion de la renta no se encontro.'
+                    });
+                  }
+                  const logoutPanel = await browser.$$('div button');
+                  /* Logout Panel */
+                  if (logoutPanel[6]) {
+                    console.log('LOGOUT PANEL OPENED ✅')
+                    await logoutPanel[6].doubleClick(); // button logout
+                    await browser.pause(500);
+
+                    console.log('ENDED PROCESS✅');
+                    await browser.deleteSession();
+                  } else {
+                    throw new BadRequestException({
+                      error: 'LOGOUT_PANEL_NOT_FOUND',
+                      detail: 'El panel de cerrar session no se logro encontrar'
+                    });
+                  }
+                } else {
+                  throw new BadRequestException({
+                    error: 'BUTTON_FORM210_NOT_FOUND',
+                    detail: 'No se logro encontrar los campos del formulario 210 para diligenciarlos'
+                  });
+                }
+
+
+              }
+
+              /* const tax_resident_1 = body.tax_resident_1 === true ? await popupQuestionFromItem[0] : await popupQuestionFromItem[1]
               await browser.pause(3000);
               const severance_pay_2016_2 = body.severance_pay_2016_2 === true ? await popupQuestionFromItem[2] : await popupQuestionFromItem[3]
               await browser.pause(3000);
@@ -717,12 +844,12 @@ export class IncomeProcessor {
               await browser.pause(3000);
               const income_country_4 = body.income_country_4 === true ? await popupQuestionFromItem[6] : await popupQuestionFromItem[7]
               await browser.pause(3000);
-
+ 
               if (tax_resident_1.isExisting()) {
                 await browser.pause(3000);
                 await tax_resident_1.doubleClick();
                 await browser.pause(3000);
-
+ 
               } else {
                 throw new BadRequestException({
                   error: 'NOT_SELECT_QUESTION_UNE',
@@ -730,12 +857,12 @@ export class IncomeProcessor {
                 });
               }
               await browser.pause(3000);
-
+ 
               if (severance_pay_2016_2.isExisting()) {
                 await browser.pause(3000);
                 await severance_pay_2016_2.doubleClick();
                 await browser.pause(3500);
-
+ 
               } else {
                 throw new BadRequestException({
                   error: 'NOT_SELECT_QUESTION_TWO',
@@ -743,12 +870,12 @@ export class IncomeProcessor {
                 });
               }
               await browser.pause(3000);
-
+ 
               if (public_server_3.isExisting()) {
                 await browser.pause(3000);
                 await public_server_3.doubleClick();
                 await browser.pause(3500);
-
+ 
               } else {
                 throw new BadRequestException({
                   error: 'NOT_SELECT_QUESTION_THREE',
@@ -756,12 +883,12 @@ export class IncomeProcessor {
                 });
               }
               await browser.pause(3000);
-
+ 
               if (income_country_4.isExisting()) {
                 await browser.pause(3000);
                 await income_country_4.doubleClick();
                 await browser.pause(3000);
-
+ 
               } else {
                 throw new BadRequestException({
                   error: 'NOT_SELECT_QUESTION_FOUR',
@@ -769,72 +896,41 @@ export class IncomeProcessor {
                 });
               }
               await browser.pause(3000);
-
+ 
               const send = await browser.$('div[class="mat-dialog-actions"] div button[class="mat-button"]');
               await send.doubleClick(); // click al botton enviar
               await browser.pause(2000);
-
+ 
               const inputText = await browser.$$('form div div div div input');
               await browser.pause(3000);
-
+ 
               if (inputText[0]) {
                 const panelBUttonSave = await browser.$$('div[class="fixed-action-btn click-to-toggle"] a')
                 if (panelBUttonSave[1]) {
                   await browser.pause(2500);
                   await panelBUttonSave[1].click();
                   await browser.pause(2500);
-
+ 
                   const buttonSave = await browser.$$('button[class="btn-floating no-shadown mat-fab mat-primary"]');
                   await browser.pause(3000);
-
-                  console.log(await buttonSave.length);
+ 
                   if (await buttonSave.length === 3) {
                     await buttonSave[0].click(); // DESCARGAR
                     await browser.pause(3500);
-
-                    /*  await buttonSave[1].click(); //Save
-                     await browser.pause(1200);
-   
-                     const buttonacetar = await browser.$$('mat-card div[class="mat-dialog-actions"] button')
-                     await buttonacetar[1].click(); // buton confirmar
-                     await browser.pause(1000); */
-
                   }
-                  /*             else if (await buttonSave.length === 1) {
-                                await buttonSave[0].click();
-                                await browser.pause(1200);
-            
-                                const buttonacetar = await browser.$$('mat-card div[class="mat-dialog-actions"] button')
-                                await buttonacetar[1].click(); // buton confirmar
-                                await browser.pause(1000);
-            
-                              } else {
-                                throw new BadRequestException({
-                                  error: 'BUTTON_SAVE_INFO_RENTAL_NOT_FOUND',
-                                  detail: 'El Boton de guardar la informacion de la declaracion de la renta no se encontro.'
-                                });
-                              } */
                 } else {
                   throw new BadRequestException({
                     error: 'PANEL_SAVE_RENTAL_NOT_FOUND',
                     detail: 'El panel para guardar la informacion de la declaracion de la renta no se encontro.'
                   });
                 }
-                //55 = 49+54-50-51-52 
-                //75 bug raro
-                //
-                //64 48 +60   61 - 37
-                //102
-                //104
-                //107
-                // 101 y 102 pago totaol
                 const logoutPanel = await browser.$$('div button');
-                /* Logout Panel */
+                /* Logout Panel *
                 if (logoutPanel[6]) {
                   console.log('LOGOUT PANEL OPENED ✅')
                   await logoutPanel[6].doubleClick(); // button logout
                   await browser.pause(500);
-
+ 
                   console.log('ENDED PROCESS✅');
                   await browser.deleteSession();
                 } else {
@@ -842,13 +938,20 @@ export class IncomeProcessor {
                     error: 'LOGOUT_PANEL_NOT_FOUND',
                     detail: 'El panel de cerrar session no se logro encontrar'
                   });
-                }
+                } 
               } else {
                 throw new BadRequestException({
                   error: 'BUTTON_FORM210_NOT_FOUND',
                   detail: 'No se logro encontrar los campos del formulario 210 para diligenciarlos'
                 });
-              }
+              } */
+            } else if (body.year_Rental_Declaration === 2018) {
+
+            } else {
+              throw new BadRequestException({
+                error: 'YEAR_NOT_FOUND',
+                detail: 'No se logro encontrar el año'
+              });
             }
 
           } else {
