@@ -2,7 +2,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Logger, BadRequestException } from "@nestjs/common";
 import { Processor, Process } from "@nestjs/bull";
 import { Repository } from "typeorm";
-import { Job } from "bull";
+import { Job, DoneCallback } from "bull";
 import { remote } from "webdriverio";
 import { config } from '../../../../wdio.conf';
 import { Audit } from "../../../entities/security/audit.entity";
@@ -15,7 +15,7 @@ export class IncomeProcessor {
   ) { }
 
   @Process({ name: 'rentalDeclaration' })
-  async rentalDeclaration(job: Job<any>) {
+  async rentalDeclaration(job: Job<any>, callback: DoneCallback) {
     const { body } = job.data;
     let browser;
 
@@ -134,19 +134,20 @@ export class IncomeProcessor {
 
                 await browser.pause(3000);
                 let millitary_forces_police_115 = await body.millitary_forces_police_115 === true ? await inputRadio[4] : await inputRadio[5];
+                millitary_forces_police_115 = await body.millitary_forces_police_115 === true ? await inputRadio[4] : await inputRadio[5];
                 await browser.pause(3000);
                 await millitary_forces_police_115.doubleClick();
                 await millitary_forces_police_115.doubleClick();
                 await browser.pause(3000);
 
-                await browser.pause(3000);
-                let compensation_insurance_117 = await body.compensation_insurance_117 === true ? await inputRadio[6] : await inputRadio[7];
-                await browser.pause(3000);
-                compensation_insurance_117 = await body.compensation_insurance_117 === true ? await inputRadio[6] : await inputRadio[7];
-                await browser.pause(3000);
-                await compensation_insurance_117.doubleClick();
-                await compensation_insurance_117.doubleClick();
-                await browser.pause(3000);
+                /*            await browser.pause(3000);
+                           let compensation_insurance_117 = await body.compensation_insurance_117 === true ? await inputRadio[6] : await inputRadio[7];
+                           await browser.pause(3000);
+                           compensation_insurance_117 = await body.compensation_insurance_117 === true ? await inputRadio[6] : await inputRadio[7];
+                           await browser.pause(3000);
+                           await compensation_insurance_117.doubleClick();
+                           await compensation_insurance_117.doubleClick();
+                           await browser.pause(3000); */
 
 
                 /* const compensation_insurance_117 = await body.compensation_insurance_117 === true ? await inputRadio[6] : await inputRadio[7];
@@ -170,14 +171,14 @@ export class IncomeProcessor {
                 await income_public_university_119.doubleClick();
                 await browser.pause(3000);
 
-                await browser.pause(3000);
-                let public_servant_121 = await body.public_servant_121 === true ? await inputRadio[10] : await inputRadio[11];
-                await browser.pause(3000);
-                public_servant_121 = await body.public_servant_121 === true ? await inputRadio[10] : await inputRadio[11];
-                await browser.pause(3000);
-                await public_servant_121.doubleClick();
-                await public_servant_121.doubleClick();
-                await browser.pause(3000);
+                /*            await browser.pause(3000);
+                           let public_servant_121 = await body.public_servant_121 === true ? await inputRadio[10] : await inputRadio[11];
+                           await browser.pause(3000);
+                           public_servant_121 = await body.public_servant_121 === true ? await inputRadio[10] : await inputRadio[11];
+                           await browser.pause(3000);
+                           await public_servant_121.doubleClick();
+                           await public_servant_121.doubleClick();
+                           await browser.pause(3000); */
 
                 /* const public_servant_121 = await body.public_servant_121 === true ? await inputRadio[10] : await inputRadio[11];
                 await browser.pause(3000);
@@ -204,32 +205,34 @@ export class IncomeProcessor {
                   await input124.setValue(body.response_hotel_rental_income_124);  //respuesta 123
                   await browser.pause(3000);
                 } */
-                await browser.pause(3000);
-
-                let hotel_rental_income_123 = await body.hotel_rental_income_123 === true ? await inputRadio[12] : await inputRadio[13];
-                await browser.pause(3000);
-                hotel_rental_income_123 = await body.hotel_rental_income_123 === true ? await inputRadio[12] : await inputRadio[13];
-                await hotel_rental_income_123.doubleClick();
-                await browser.pause(3000);
-                await hotel_rental_income_123.doubleClick();
-                await browser.pause(3000);
+                /*  await browser.pause(3000);
+ 
+                  let hotel_rental_income_123 = await body.hotel_rental_income_123 === true ? await inputRadio[12] : await inputRadio[13];
+                 await browser.pause(3000);
+                 hotel_rental_income_123 = await body.hotel_rental_income_123 === true ? await inputRadio[12] : await inputRadio[13];
+                 await hotel_rental_income_123.doubleClick();
+                 await browser.pause(3000);
+                 await hotel_rental_income_123.doubleClick();
+                 await browser.pause(3000); */
 
                 let work_rental_income_125 = await body.work_rental_income_125 === true ? await inputRadio[14] : await inputRadio[15];
                 await browser.pause(3000);
                 work_rental_income_125 = await body.work_rental_income_125 === true ? await inputRadio[14] : await inputRadio[15];
                 await browser.pause(3000);
                 await work_rental_income_125.doubleClick();
+                work_rental_income_125 = await body.work_rental_income_125 === true ? await inputRadio[14] : await inputRadio[15];
+
                 await work_rental_income_125.doubleClick();
                 await browser.pause(3000);
 
-                await browser.pause(3000);
-                let can_capital_income_127 = await body.can_capital_income_127 === true ? await inputRadio[16] : await inputRadio[17];
-                await browser.pause(3000);
-                can_capital_income_127 = await body.can_capital_income_127 === true ? await inputRadio[16] : await inputRadio[17];
-                await browser.pause(3000);
-                await can_capital_income_127.doubleClick();
-                await can_capital_income_127.doubleClick();
-                await browser.pause(3000);
+                /*       await browser.pause(3000);
+                      let can_capital_income_127 = await body.can_capital_income_127 === true ? await inputRadio[16] : await inputRadio[17];
+                      await browser.pause(3000);
+                      can_capital_income_127 = await body.can_capital_income_127 === true ? await inputRadio[16] : await inputRadio[17];
+                      await browser.pause(3000);
+                      await can_capital_income_127.doubleClick();
+                      await can_capital_income_127.doubleClick();
+                      await browser.pause(3000); */
 
                 /* const can_capital_income_127 = await body.can_capital_income_127 === true ? await inputRadio[16] : await inputRadio[17];
                 await browser.pause(3000);
@@ -637,23 +640,24 @@ export class IncomeProcessor {
                   console.log(await buttonSave.length);
                   if (await buttonSave.length === 3) {
                     await buttonSave[0].doubleClick(); // DESCARGAR
-                    await browser.pause(3500);
+                    await browser.pause(4500);
 
                   } else if (await buttonSave.length === 1) {
                     await buttonSave[0].doubleClick(); // guardar
-                    await browser.pause(2500);
+                    await browser.pause(3500);
 
                     const buttonacetar = await browser.$$('mat-card div[class="mat-dialog-actions"] button')
                     await buttonacetar[0].doubleClick(); // buton confirmar para guardar
                     await browser.pause(3000);
 
-                    /*  await browser.pause(1500);
-                     await panelBUttonSave[0].click();
-                     await browser.pause(1500);*/
+                    const cerrar = await browser.$('button[class="mat-button"]');
+                    await cerrar.doubleClick();
+                    await browser.pause(3000);
 
-                    const buttonSave2 = await browser.$$('button[class="btn-floating no-shadown mat-fab mat-primary"]');
-                    await buttonSave2[0].doubleClick(); // DESCARGAR
-                    await browser.pause(2500);
+                    await browser.pause(4000);
+                    const newOptionMenu = await browser.$$('button[class="btn-floating no-shadown mat-fab mat-primary"]');
+                    await newOptionMenu[0].doubleClick();
+                    await browser.pause(4500);
 
                   } else {
                     throw new BadRequestException({
@@ -667,7 +671,7 @@ export class IncomeProcessor {
                     detail: 'El panel para guardar la informacion de la declaracion de la renta no se encontro.'
                   });
                 }
-                await browser.pause(2000);
+                await browser.pause(3000);
                 const logoutPanel = await browser.$$('div button');
                 /* Logout Panel */
                 if (logoutPanel[6]) {

@@ -80,7 +80,7 @@ exports.config = {
         //
         browserName: 'chrome',
         'goog:chromeOptions': {
-            args: ['--disable-popup-blocking', '-incognito', '--disable-gpu-program-cache', '--disable-gpu-shader-disk-cache', '--allow-popups-during-page-unload', /* '--headless',  '--no-sandbox',*/ '--silent', /* '--disable-gpu' */],
+            args: ['--disable-popup-blocking',/*  '-incognito',  */'--disable-gpu-program-cache', '--disable-gpu-shader-disk-cache', '--allow-popups-during-page-unload', /* '--headless',  '--no-sandbox',*/ '--silent', /* '--disable-gpu' */],
         },
         prefs: {
             'directory_upgrade': true,
