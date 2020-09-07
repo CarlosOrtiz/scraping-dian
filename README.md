@@ -25,6 +25,7 @@ https://nodejs.org/dist/v12.18.3/node-v12.18.3.pkg
 ```bash
 npm run start:dev
 ```
+#### 4. Tener la carpeta descargas vacia, totalmente libre
 
 ## Crear un archivo con la siguente extención .env para las varibles de entorno
 #### .env
