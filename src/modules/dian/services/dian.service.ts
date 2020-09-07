@@ -19,7 +19,6 @@ const bufferFrom = require('buffer-from');
 const path = require('path');
 const util = require('util');
 const fs = require('fs')
-const FileHound = require('filehound');
 const { readdir, stat } = require("fs").promises
 const rutica = path.join(__dirname, '../../../../../../../Descargas/');
 
@@ -34,19 +33,19 @@ export class DianService {
   async downloadRut(document: string, password: string) {
     const job = await this.dianQueue.add('downloadRut', { document, password }, { priority: 4 });
 
-    if (job) {
-      const arraDIr = await this.scanDirs(rutica)
-      let dirDocument = path.join(__dirname, '../../../../../../../Descargas/', '14659862170 (4).pdf');
-      console.log(arraDIr)
-      /*  arraDIr.map(item => {
-         console.log(item);
-       }) */
-      const fileUpload = await this.UploadFileGDrive(dirDocument);
-      /*    dirDocument = path.join(__dirname, '../../../../../../../Descargas/', '14659862170.pdf'); */
+    /*   if (job) {
+        const arraDIr = await this.scanDirs(rutica)
+        let dirDocument = path.join(__dirname, '../../../../../../../Descargas/', '14659862170 (4).pdf');
+        console.log(arraDIr) */
+    /*  arraDIr.map(item => {
+       console.log(item);
+     }) */
+    /* const fileUpload = await this.UploadFileGDrive(dirDocument); */
+    /*    dirDocument = path.join(__dirname, '../../../../../../../Descargas/', '14659862170.pdf'); */
 
 
-      return { success: 'OK', url: `https://drive.google.com/file/d/${fileUpload.id}/view?usp=sharing` }
-    }
+    /*  return { success: 'OK', url: `https://drive.google.com/file/d/${fileUpload.id}/view?usp=sharing` } 
+   }*/
 
   }
 

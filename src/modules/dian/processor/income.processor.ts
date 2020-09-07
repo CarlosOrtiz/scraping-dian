@@ -7,9 +7,11 @@ import { remote } from "webdriverio";
 import { config } from '../../../../wdio.conf';
 import { Audit } from "../../../entities/security/audit.entity";
 
-import path = require("path");
 const NodeGoogleDrive = require('node-google-drive-new');
 const credentials = require('../../../../proxy-google-drive.json');
+const path = require('path');
+const rutica = path.join(__dirname, '../../../../../../../Descargas/');
+const fs = require('fs')
 
 @Processor('dian')
 export class IncomeProcessor {
@@ -1007,16 +1009,39 @@ export class IncomeProcessor {
       }
     }
 
-
-    const dirDocument = path.join(__dirname, '../../../../../../../Descargas/' + '2116619671808.pdf');
-
-    const fileUpload = await this.UploadFileGDrive(dirDocument, 'subido');
-    console.log(fileUpload);
-    return { success: 'OK' }
+    const arraDIr = await this.scanDirs(rutica)
+    console.log(arraDIr);
+    /*     const dirRut = await path.join(__dirname, '../../../../../../../Descargas/', '14659862170.pdf')
+        const dirExogenous = await path.join(__dirname, '../../../../../../../Descargas/', 'reporte.xls')
+        const fileRut = await this.UploadFileGDrive(dirRut, ('RUT-' + job.id));
+        const fileExogenous = await this.UploadFileGDrive(dirExogenous);
+        await fs.unlinkSync(dirRut) */
+    return {
+      success: 'OK', data: arraDIr
+    }
   }
 
+  async scanDirs(dir) {
+    return await fs.readdir(dir, (err, files) => {
+      var r = [];
+      files.forEach((file) => {
+        s(file);
+        function s(file) {
+          fs.stat(dir + '/' + file, (err, stat) => {
+            if (err) { console.error(err); return; }
+            else if (stat.isFile()) r.push({ f: file, type: 'file' });
+            else r.push(0);
+            if (r.length == files.length) {
+              r.filter((m) => { return m; });
+              console.log(r);
+            }
+          });
+        }
+      });
+    });
+  }
 
-  async UploadFileGDrive(file, name) {
+  async UploadFileGDrive(file, name?) {
     const YOUR_ROOT_FOLDER = '1D4gwvPNeCW3HFSPeoCTvknZO_4vhrgdc'; // id de mi carpeta de drive
     const PATH_TO_CREDENTIALS = credentials;
 

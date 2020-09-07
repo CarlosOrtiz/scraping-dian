@@ -6,11 +6,14 @@ import { Job } from "bull";
 import { remote } from "webdriverio";
 import { config } from '../../../../wdio.conf';
 import { Audit } from "../../../entities/security/audit.entity";
+import { onErrorResumeNext } from "rxjs";
+import { response } from "express";
 const NodeGoogleDrive = require('node-google-drive-new');
 const credentials = require('../../../../proxy-google-drive.json');
 const path = require('path');
 const rutica = path.join(__dirname, '../../../../../../../Descargas/');
 const fs = require('fs')
+const moment = require('moment');
 
 @Processor('dian')
 export class RutExogenousProcessor {
@@ -40,7 +43,7 @@ export class RutExogenousProcessor {
     try {
       browser = await remote(config);
       console.log('URL ✅');
-      await browser.throttle('Regular2G');
+      /* await browser.throttle('Regular2G'); */
       await browser.url(`${process.env.DIAN_URL_BASE}`);
 
       const loginForm = await browser.$('form > table[class="formulario_muisca"] > tbody > tr tr table');
@@ -182,15 +185,18 @@ export class RutExogenousProcessor {
         return err
       }
     }
+    const arraDIr = await this.scanDirs(rutica);
+    const dirRut = await path.join(__dirname, '../../../../../../../Descargas/', arraDIr[0])
+    console.log(dirRut)
+    const dirExogenous = await path.join(__dirname, '../../../../../../../Descargas/', arraDIr[1])
+    console.log(dirExogenous)
 
-    const arraDIr = await this.scanDirs(rutica)
-    console.log(arraDIr)
-    let dirRut = path.join(__dirname, '../../../../../../../Descargas/', '14659862170.pdf')
-    let dirExogenous = path.join(__dirname, '../../../../../../../Descargas/', 'reporte.xls')
-    const fileRut = await this.UploadFileGDrive(dirRut);
+    const today = moment().format('YYYY-MM-DD-mm-ss');
+    const fileRut = await this.UploadFileGDrive(dirRut, ('RUT-' + job.id));
     const fileExogenous = await this.UploadFileGDrive(dirExogenous);
-    fs.unlinkSync(dirRut)
-    fs.unlinkSync(dirExogenous)
+    await fs.unlinkSync(dirRut)
+    await fs.unlinkSync(dirExogenous)
+    console.log('FILES DELETE')
     return {
       success: 'OK',
       url_Rut: `https://drive.google.com/file/d/${fileRut.id}/view?usp=sharing`,
@@ -222,23 +228,37 @@ export class RutExogenousProcessor {
   }
 
   async scanDirs(dir) {
-    return await fs.readdir(dir, (err, files) => {
-      var r = [];
-      files.forEach((file) => {
-        s(file);
-        function s(file) {
-          fs.stat(dir + '/' + file, (err, stat) => {
-            if (err) { console.error(err); return; }
-            else if (stat.isFile()) r.push({ f: file, type: 'file' });
-            else r.push(0);
-            if (r.length == files.length) {
-              r.filter((m) => { return m; });
-              console.log(r);
+
+    const response = [];
+    fs.readdirSync(dir).forEach(file => {
+      response.push(file)
+    });
+    return response;
+
+    /*  fs.readdir(dir, function (err, archivos) {
+       if (err) {
+         onErrorResumeNext(err);
+         return;
+       }
+       return archivos
+     }); */
+    /*     return await fs.readdir(dir, (err, files) => {
+          var r = [];
+          files.forEach((file) => {
+            s(file);
+            function s(file) {
+              fs.stat(dir + '/' + file, (err, stat) => {
+                if (err) { console.error(err); return; }
+                else if (stat.isFile()) r.push(file);
+                else r.push(0);
+                if (r.length == files.length) {
+                  r.filter((m) => { return m; });
+                  console.log(r);
+                }
+              });
             }
           });
-        }
-      });
-    });
+        }); */
   }
 
 }
