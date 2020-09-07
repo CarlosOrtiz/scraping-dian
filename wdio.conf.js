@@ -127,7 +127,7 @@ exports.config = {
     baseUrl: 'https://localhost',
     //
     // Default timeout for all waitFor* commands.
-    waitforTimeout: 180000,
+    waitforTimeout: 300000,
     //
     // Default timeout in milliseconds for request
     // if browser driver or grid doesn't send response
@@ -196,7 +196,7 @@ exports.config = {
         // TypeScript setup
         require: ['ts-node/register'],
         ui: 'bdd',
-        timeout: 6000000000
+        timeout: 300000
     },
 
     /*    onPrepare: function (config, capabilities) {
