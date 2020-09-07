@@ -21,7 +21,7 @@ import 'dotenv/config';
       limiter: {
         max: 1,
         duration: 1000,
-        bounceBack: true
+        bounceBack: false
       },
       redis: {
         host: process.env.REDIS_HOST,

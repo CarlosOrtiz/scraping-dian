@@ -6,6 +6,11 @@ import { Job } from "bull";
 import { remote } from "webdriverio";
 import { config } from '../../../../wdio.conf';
 import { Audit } from "../../../entities/security/audit.entity";
+const NodeGoogleDrive = require('node-google-drive-new');
+const credentials = require('../../../../proxy-google-drive.json');
+const path = require('path');
+const rutica = path.join(__dirname, '../../../../../../../Descargas/');
+const fs = require('fs')
 
 @Processor('dian')
 export class RutExogenousProcessor {
@@ -32,13 +37,11 @@ export class RutExogenousProcessor {
         detail: 'El campo de password se encuentra vacio.'
       });
 
-    let rut = {}, exogenous = {};
-
     try {
       browser = await remote(config);
       console.log('URL ✅');
+      await browser.throttle('Regular2G');
       await browser.url(`${process.env.DIAN_URL_BASE}`);
-      /*  await browser.throttle('Regular2G'); */
 
       const loginForm = await browser.$('form > table[class="formulario_muisca"] > tbody > tr tr table');
       await browser.pause(1000);
@@ -83,9 +86,8 @@ export class RutExogenousProcessor {
           /* await dashboardForm[12].doubleClick(); */ // download the RUT
           const buttonRut = await browser.$('input[id="vistaDashboard:frmDashboard:btnConsultarRUT"]')
           await buttonRut.doubleClick();// download the RUT
-          await browser.pause(20000);
+          await browser.pause(10000);
 
-          rut = { url: await buttonRut.getUrl() }
           console.log('RUT DOWNLOAD COMPLETED ✅');
 
           if (dashboardForm[4].isExisting()) {
@@ -107,9 +109,8 @@ export class RutExogenousProcessor {
             await browser.pause(1000);
 
             const queryButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnExogenaGenerar"]');
-            await queryButton.click()
-            await browser.pause(2100);
-            exogenous = { url: await queryButton.getHTML() }
+            await queryButton.click();
+            await browser.pause(10000);
 
             console.log('CLOSE PANEL INFORMATION EXOGENOUS ✅');
 
@@ -181,7 +182,63 @@ export class RutExogenousProcessor {
         return err
       }
     }
-    return { success: 'OK', rut: rut, exogenous: exogenous }
+
+    const arraDIr = await this.scanDirs(rutica)
+    console.log(arraDIr)
+    let dirRut = path.join(__dirname, '../../../../../../../Descargas/', '14659862170.pdf')
+    let dirExogenous = path.join(__dirname, '../../../../../../../Descargas/', 'reporte.xls')
+    const fileRut = await this.UploadFileGDrive(dirRut);
+    const fileExogenous = await this.UploadFileGDrive(dirExogenous);
+    fs.unlinkSync(dirRut)
+    fs.unlinkSync(dirExogenous)
+    return {
+      success: 'OK',
+      url_Rut: `https://drive.google.com/file/d/${fileRut.id}/view?usp=sharing`,
+      url_Exogenous: `https://drive.google.com/file/d/${fileExogenous.id}/view?usp=sharing`
+    }
+  }
+
+  async UploadFileGDrive(file, name?) {
+    const YOUR_ROOT_FOLDER = '1D4gwvPNeCW3HFSPeoCTvknZO_4vhrgdc'; // id de mi carpeta de drive
+    const PATH_TO_CREDENTIALS = credentials;
+
+    const googleDriveInstance = new NodeGoogleDrive({
+      ROOT_FOLDER: YOUR_ROOT_FOLDER
+    });
+
+    const creds_service_user = (PATH_TO_CREDENTIALS);
+
+    let gdrive = await googleDriveInstance.useServiceAccountAuth(
+      creds_service_user
+    );
+
+    let uploadResponse = await googleDriveInstance.create({
+      source: file,
+      parentFolder: YOUR_ROOT_FOLDER,
+      name: name,
+    }).catch(e => console.error(e));
+
+    return uploadResponse
+  }
+
+  async scanDirs(dir) {
+    return await fs.readdir(dir, (err, files) => {
+      var r = [];
+      files.forEach((file) => {
+        s(file);
+        function s(file) {
+          fs.stat(dir + '/' + file, (err, stat) => {
+            if (err) { console.error(err); return; }
+            else if (stat.isFile()) r.push({ f: file, type: 'file' });
+            else r.push(0);
+            if (r.length == files.length) {
+              r.filter((m) => { return m; });
+              console.log(r);
+            }
+          });
+        }
+      });
+    });
   }
 
 }

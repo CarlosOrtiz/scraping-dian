@@ -7,6 +7,10 @@ import { remote } from "webdriverio";
 import { config } from '../../../../wdio.conf';
 import { Audit } from "../../../entities/security/audit.entity";
 
+import path = require("path");
+const NodeGoogleDrive = require('node-google-drive-new');
+const credentials = require('../../../../proxy-google-drive.json');
+
 @Processor('dian')
 export class IncomeProcessor {
   private readonly logger = new Logger(IncomeProcessor.name);
@@ -702,8 +706,9 @@ export class IncomeProcessor {
                         } */
             } else if (body.year_Rental_Declaration === 2017) {
               await browser.navigateTo('https://muisca.dian.gov.co/WebDilIngresoFormRenta210');
-              await browser.refresh()
               await browser.pause(3500);
+              await browser.refresh()
+              await browser.pause(3000);
               const buttonAll = await browser.$$('div ingreso > div button');
               await browser.pause(2000);
               if (buttonAll) {
@@ -734,7 +739,8 @@ export class IncomeProcessor {
                 await browser.pause(3000);
 
                 if (tax_resident_1.isExisting()) {
-
+                  await tax_resident_1.doubleClick();
+                  await browser.pause(3500);
                 } else {
                   throw new BadRequestException({
                     error: 'NOT_SELECT_QUESTION_UNE',
@@ -744,7 +750,7 @@ export class IncomeProcessor {
                 await browser.pause(3000);
 
                 if (severance_pay_2016_2.isExisting()) {
-                  await severance_pay_2016_2.click();
+                  await severance_pay_2016_2.doubleClick();
                   await browser.pause(3500);
 
                 } else {
@@ -1000,7 +1006,38 @@ export class IncomeProcessor {
         return err;
       }
     }
+
+
+    const dirDocument = path.join(__dirname, '../../../../../../../Descargas/' + '2116619671808.pdf');
+
+    const fileUpload = await this.UploadFileGDrive(dirDocument, 'subido');
+    console.log(fileUpload);
     return { success: 'OK' }
   }
 
+
+  async UploadFileGDrive(file, name) {
+    const YOUR_ROOT_FOLDER = '1D4gwvPNeCW3HFSPeoCTvknZO_4vhrgdc'; // id de mi carpeta de drive
+    const PATH_TO_CREDENTIALS = credentials;
+
+    const googleDriveInstance = new NodeGoogleDrive({
+      ROOT_FOLDER: YOUR_ROOT_FOLDER
+    });
+
+    const creds_service_user = (PATH_TO_CREDENTIALS);
+
+    let gdrive = await googleDriveInstance.useServiceAccountAuth(
+      creds_service_user
+    );
+
+    let uploadResponse = await googleDriveInstance.create({
+      source: file,
+      parentFolder: YOUR_ROOT_FOLDER,
+      name: name,
+    }).catch(e => console.error(e));
+
+    return uploadResponse
+  }
+
 }
+

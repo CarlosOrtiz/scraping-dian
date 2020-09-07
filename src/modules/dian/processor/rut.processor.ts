@@ -6,9 +6,11 @@ import { Job } from "bull";
 import { remote } from "webdriverio";
 import { config } from '../../../../wdio.conf';
 import { Audit } from "../../../entities/security/audit.entity";
+import { onErrorResumeNext } from "rxjs";
+import { join } from "path";
 const fs = require('fs')
-const credentials = require('../../../../proxy-google-drive.json');
 const axios = require('axios')
+const { readdir, stat } = require("fs").promises
 const path = require('path');
 const { Builder, By, Key, until, Capabilities } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
@@ -36,8 +38,6 @@ export class RutProcessor {
 
   @Process({ name: 'downloadRut' })
   async downloadRut(job: Job<any>) {
-    console.log(credentials);
-    const downloadDir = path.join(__dirname, '../../../../src/modules/dian/files');
     let browser;
     const { document, password } = job.data;
 
@@ -54,7 +54,7 @@ export class RutProcessor {
       });
 
     let rut = {}, exogenous = {};
-
+    let base64String;
     try {
       browser = await remote(config);
       console.log('URL ✅');
@@ -104,8 +104,6 @@ export class RutProcessor {
           const buttonRut = await browser.$('input[id="vistaDashboard:frmDashboard:btnConsultarRUT"]')
           await buttonRut.doubleClick();// download the RUT
           await browser.pause(10000);
-
-          rut = { url: await buttonRut.getUrl() }
           console.log('RUT DOWNLOAD COMPLETED ✅');
 
           if (dashboardForm[3]) {
@@ -168,9 +166,9 @@ export class RutProcessor {
         return err
       }
     }
-    return { success: 'OK', rut: rut }
+
+    return { success: 'OK' }
+
   }
-
-
 
 }
