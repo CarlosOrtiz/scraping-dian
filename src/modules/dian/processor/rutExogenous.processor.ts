@@ -26,6 +26,8 @@ export class RutExogenousProcessor {
   @Process({ name: 'downloadExogenousRut' })
   async downloadExogenousRut(job: Job<any>) {
     let browser;
+    let fileExogenous;
+    let fileRut;
     const { document, password } = job.data;
 
     if (!document)
@@ -43,8 +45,8 @@ export class RutExogenousProcessor {
     try {
       browser = await remote(config);
       console.log('URL ✅');
-      /* await browser.throttle('Regular2G'); */
       await browser.url(`${process.env.DIAN_URL_BASE}`);
+      /* await browser.throttle('Regular2G'); */
 
       const loginForm = await browser.$('form > table[class="formulario_muisca"] > tbody > tr tr table');
       await browser.pause(1000);
@@ -91,6 +93,13 @@ export class RutExogenousProcessor {
           await buttonRut.doubleClick();// download the RUT
           await browser.pause(10000);
 
+          let arraDIr = await this.scanDirs(rutica);
+          const dirRut = await path.join(__dirname, '../../../../../../../Descargas/', arraDIr[0])
+          fileRut = await this.UploadFileGDrive(dirRut, ('RUT-' + job.id));
+          console.log(dirRut)
+          await fs.unlinkSync(dirRut)
+          await browser.pause(5000);
+
           console.log('RUT DOWNLOAD COMPLETED ✅');
 
           if (dashboardForm[4].isExisting()) {
@@ -115,6 +124,14 @@ export class RutExogenousProcessor {
             await queryButton.click();
             await browser.pause(10000);
 
+            arraDIr = await this.scanDirs(rutica);
+            const dirExogenous = await path.join(__dirname, '../../../../../../../Descargas/', arraDIr[0])
+            console.log(dirExogenous)
+            const today = moment().format('YYYY-MM-DD-mm-ss');
+            fileExogenous = await this.UploadFileGDrive(dirExogenous);
+            await fs.unlinkSync(dirExogenous)
+            console.log('FILES DELETE')
+
             console.log('CLOSE PANEL INFORMATION EXOGENOUS ✅');
 
             /* Logout Panel */
@@ -132,6 +149,7 @@ export class RutExogenousProcessor {
                 detail: 'El panel de cerrar session no se logro encontrar'
               });
             }
+
 
           } else {
             throw new BadRequestException({
@@ -185,18 +203,8 @@ export class RutExogenousProcessor {
         return err
       }
     }
-    const arraDIr = await this.scanDirs(rutica);
-    const dirRut = await path.join(__dirname, '../../../../../../../Descargas/', arraDIr[0])
-    console.log(dirRut)
-    const dirExogenous = await path.join(__dirname, '../../../../../../../Descargas/', arraDIr[1])
-    console.log(dirExogenous)
 
-    const today = moment().format('YYYY-MM-DD-mm-ss');
-    const fileRut = await this.UploadFileGDrive(dirRut, ('RUT-' + job.id));
-    const fileExogenous = await this.UploadFileGDrive(dirExogenous);
-    await fs.unlinkSync(dirRut)
-    await fs.unlinkSync(dirExogenous)
-    console.log('FILES DELETE')
+
     return {
       success: 'OK',
       url_Rut: `https://drive.google.com/file/d/${fileRut.id}/view?usp=sharing`,

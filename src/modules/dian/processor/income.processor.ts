@@ -98,7 +98,6 @@ export class IncomeProcessor {
 
             const send = await browser.$('div[class="mat-dialog-actions"] div button[class="mat-button"]');
             await send.doubleClick(); // click al botton enviar
-            await browser.pause(2000);
 
             // let inputText = await browser.$$('form div div div div input[type="text"]');
             await browser.pause(2000)
@@ -107,182 +106,143 @@ export class IncomeProcessor {
             const inputSelect = await browser.$$('form div div div div select');
             await browser.pause(2000);
 
+            let flag = true;
+
             if (inputRadio[0]) {
               await browser.pause(3000);
-
               const income_country_27 = await body.income_country_27 === true ? await inputRadio[0] : await inputRadio[1];
               await income_country_27.doubleClick(); // 27 *
               await browser.pause(3000);
+              console.log(await income_country_27.isExisting() + ' 1');
 
-              const retirement_unemployment_113 = await body.retirement_unemployment_113 === true ? await inputRadio[2] : await inputRadio[3];
+              let retirement_unemployment_113 = await body.retirement_unemployment_113 === true ? await inputRadio[2] : await inputRadio[3];
               await browser.pause(3500);
               await retirement_unemployment_113.doubleClick();
               await retirement_unemployment_113.doubleClick();
+              retirement_unemployment_113 = await body.retirement_unemployment_113 === true ? await inputRadio[2] : await inputRadio[3];
+              await retirement_unemployment_113.doubleClick();
               await browser.pause(3000);
+              console.log(await retirement_unemployment_113.isExisting() + ' 2');
 
-              await browser.pause(3000);
               let millitary_forces_police_115 = await body.millitary_forces_police_115 === true ? await inputRadio[4] : await inputRadio[5];
+              await browser.pause(3500);
+              await millitary_forces_police_115.doubleClick();
+              await millitary_forces_police_115.doubleClick();
               millitary_forces_police_115 = await body.millitary_forces_police_115 === true ? await inputRadio[4] : await inputRadio[5];
-              await browser.pause(3000);
-              await millitary_forces_police_115.doubleClick();
               await millitary_forces_police_115.doubleClick();
               await browser.pause(3000);
-
-              /*            await browser.pause(3000);
-                         let compensation_insurance_117 = await body.compensation_insurance_117 === true ? await inputRadio[6] : await inputRadio[7];
-                         await browser.pause(3000);
-                         compensation_insurance_117 = await body.compensation_insurance_117 === true ? await inputRadio[6] : await inputRadio[7];
-                         await browser.pause(3000);
-                         await compensation_insurance_117.doubleClick();
-                         await compensation_insurance_117.doubleClick();
-                         await browser.pause(3000); */
+              console.log(await millitary_forces_police_115.isExisting() + ' 3');
 
 
-              /* const compensation_insurance_117 = await body.compensation_insurance_117 === true ? await inputRadio[6] : await inputRadio[7];
-              await browser.pause(3000);
+              let compensation_insurance_117 = await body.compensation_insurance_117 === true ? await inputRadio[6] : await inputRadio[7];
+              await browser.pause(3500);
+              await compensation_insurance_117.doubleClick();
+              await compensation_insurance_117.doubleClick();
+              compensation_insurance_117 = await body.compensation_insurance_117 === true ? await inputRadio[6] : await inputRadio[7];
               await compensation_insurance_117.doubleClick();
               await browser.pause(3000);
+              console.log(await compensation_insurance_117.isExisting() + ' 4');
 
-              if (await body.compensation_insurance_117 === true) {
-                const input118 = await browser.$('input[id="cs_id_118"]')
-                await browser.pause(3000);
-                await input118.setValue(' ');
-                await input118.setValue(body.response_compensation_insurance_118);  //respuesta 117
-                await browser.pause(3000);
-              } */
-              await browser.pause(3000);
+
               let income_public_university_119 = await body.income_public_university_119 === true ? await inputRadio[8] : await inputRadio[9];
-              await browser.pause(3000);
+              await browser.pause(3500);
+              await income_public_university_119.doubleClick();
+              await income_public_university_119.doubleClick();
               income_public_university_119 = await body.income_public_university_119 === true ? await inputRadio[8] : await inputRadio[9];
-              await browser.pause(3000);
-              await income_public_university_119.doubleClick();
               await income_public_university_119.doubleClick();
               await browser.pause(3000);
+              console.log(await income_public_university_119.isExisting() + ' 5');
 
-              /*            await browser.pause(3000);
-                         let public_servant_121 = await body.public_servant_121 === true ? await inputRadio[10] : await inputRadio[11];
-                         await browser.pause(3000);
-                         public_servant_121 = await body.public_servant_121 === true ? await inputRadio[10] : await inputRadio[11];
-                         await browser.pause(3000);
-                         await public_servant_121.doubleClick();
-                         await public_servant_121.doubleClick();
-                         await browser.pause(3000); */
 
-              /* const public_servant_121 = await body.public_servant_121 === true ? await inputRadio[10] : await inputRadio[11];
-              await browser.pause(3000);
+              let public_servant_121 = await body.public_servant_121 === true ? await inputRadio[10] : await inputRadio[11];
+              await browser.pause(3500);
+              await public_servant_121.doubleClick();
+              await public_servant_121.doubleClick();
+              public_servant_121 = await body.public_servant_121 === true ? await inputRadio[10] : await inputRadio[11];
               await public_servant_121.doubleClick();
               await browser.pause(3000);
+              console.log(await public_servant_121.isExisting() + ' 6');
 
-              if (await body.public_servant_121 === true) {
-                const input122 = await browser.$('input[id="cs_id_122"]')
-                await browser.pause(3000);
-                await input122.setValue(' ');
-                await input122.setValue(body.response_public_servant_122);  //respuesta 121
-                await browser.pause(3000);
-              }
 
-              const hotel_rental_income_123 = await body.hotel_rental_income_123 === true ? await inputRadio[12] : await inputRadio[13];
-              await browser.pause(3000);
+              let hotel_rental_income_123 = await body.hotel_rental_income_123 === true ? await inputRadio[12] : await inputRadio[13];
+              await browser.pause(3500);
+              await hotel_rental_income_123.doubleClick();
+              await hotel_rental_income_123.doubleClick();
+              hotel_rental_income_123 = await body.hotel_rental_income_123 === true ? await inputRadio[12] : await inputRadio[13];
               await hotel_rental_income_123.doubleClick();
               await browser.pause(3000);
+              console.log(await hotel_rental_income_123.isExisting() + ' 7');
 
-              if (await body.hotel_rental_income_123 === true) {
-                const input124 = await browser.$('input[id="cs_id_124"]')
-                await browser.pause(3000);
-                await input124.setValue(' ');
-                await input124.setValue(body.response_hotel_rental_income_124);  //respuesta 123
-                await browser.pause(3000);
-              } */
-              /*  await browser.pause(3000);
- 
-                let hotel_rental_income_123 = await body.hotel_rental_income_123 === true ? await inputRadio[12] : await inputRadio[13];
-               await browser.pause(3000);
-               hotel_rental_income_123 = await body.hotel_rental_income_123 === true ? await inputRadio[12] : await inputRadio[13];
-               await hotel_rental_income_123.doubleClick();
-               await browser.pause(3000);
-               await hotel_rental_income_123.doubleClick();
-               await browser.pause(3000); */
 
               let work_rental_income_125 = await body.work_rental_income_125 === true ? await inputRadio[14] : await inputRadio[15];
               await browser.pause(3000);
-              work_rental_income_125 = await body.work_rental_income_125 === true ? await inputRadio[14] : await inputRadio[15];
-              await browser.pause(3000);
+              await work_rental_income_125.doubleClick();
               await work_rental_income_125.doubleClick();
               work_rental_income_125 = await body.work_rental_income_125 === true ? await inputRadio[14] : await inputRadio[15];
-
               await work_rental_income_125.doubleClick();
               await browser.pause(3000);
+              console.log(await work_rental_income_125.isExisting() + ' 8');
 
-              /*       await browser.pause(3000);
-                    let can_capital_income_127 = await body.can_capital_income_127 === true ? await inputRadio[16] : await inputRadio[17];
-                    await browser.pause(3000);
-                    can_capital_income_127 = await body.can_capital_income_127 === true ? await inputRadio[16] : await inputRadio[17];
-                    await browser.pause(3000);
-                    await can_capital_income_127.doubleClick();
-                    await can_capital_income_127.doubleClick();
-                    await browser.pause(3000); */
 
-              /* const can_capital_income_127 = await body.can_capital_income_127 === true ? await inputRadio[16] : await inputRadio[17];
-              await browser.pause(3000);
+              let can_capital_income_127 = await body.can_capital_income_127 === true ? await inputRadio[16] : await inputRadio[17];
+              await browser.pause(3500);
+              await can_capital_income_127.doubleClick();
+              await can_capital_income_127.doubleClick();
+              can_capital_income_127 = await body.can_capital_income_127 === true ? await inputRadio[16] : await inputRadio[17];
               await can_capital_income_127.doubleClick();
               await browser.pause(3000);
-
-              if (await body.can_capital_income_127 === true) {
-                const input128 = await browser.$('input[id="cs_id_128"]')
-                await browser.pause(3000);
-                await input128.setValue(' ');
-                await input128.setValue(body.response_can_capital_income_128);  //respuesta 127
-                await browser.pause(3000);
-              } */
-              await browser.pause(3000);
+              console.log(await can_capital_income_127.isExisting() + ' 9');
 
               let not_work_rental_income_129 = await body.not_work_rental_income_129 === true ? await inputRadio[18] : await inputRadio[19];
               await browser.pause(3000);
+              await not_work_rental_income_129.doubleClick();
+              await not_work_rental_income_129.doubleClick();
               not_work_rental_income_129 = await body.not_work_rental_income_129 === true ? await inputRadio[18] : await inputRadio[19];
-              await browser.pause(3000);
-              await not_work_rental_income_129.doubleClick();
               await not_work_rental_income_129.doubleClick();
               await browser.pause(3000);
+              console.log(await not_work_rental_income_129.isExisting() + ' 10');
 
-              if (await body.retirement_unemployment_113 === true) {
-                await browser.pause(3000);
-                const input114 = await browser.$('input[id="cs_id_114"]')
-                await browser.pause(3000);
-                await input114.clearValue()
-                await input114.setValue(await body.response_retirement_unemployment_114);  //respuesta 113
-                await browser.pause(3000);
-              }
-              if (await body.millitary_forces_police_115 === true) {
-                await browser.pause(3000);
-                const input116 = await browser.$('input[id="cs_id_116"]')
-                await browser.pause(3000);
-                await input116.clearValue()
-                await input116.setValue(body.response_millitary_forces_police_116);  //respuesta 115
-                await browser.pause(3000);
-              }
-              if (await body.income_public_university_119 === true) {
-                await browser.pause(3000);
-                const input120 = await browser.$('input[id="cs_id_120"]')
-                await browser.pause(3000);
-                await input120.clearValue()
-                await input120.setValue(body.response_income_public_university_120);  //respuesta 119
-                await browser.pause(3000);
-              }
-              if (await body.work_rental_income_125 === true) {
-                await browser.pause(3000);
-                const input126 = await browser.$('input[id="cs_id_126"]')
-                await browser.pause(3000);
-                await input126.clearValue()
-                await input126.setValue(body.response_work_rental_income_126);  //respuesta 125
-                await browser.pause(3000);
-              }
-              if (await body.not_work_rental_income_129 === true) {
-                await browser.pause(3000);
-                const input130 = await browser.$('input[id="cs_id_130"]')
-                await browser.pause(3000);
-                await input130.clearValue()
-                await input130.setValue(body.response_not_work_rental_income_130);  //respuesta 129
-                await browser.pause(3000);
+              if (flag) {
+                if (await body.retirement_unemployment_113 === true) {
+                  await browser.pause(3000);
+                  const input114 = await browser.$('input[id="cs_id_114"]')
+                  await browser.pause(3000);
+                  await input114.clearValue()
+                  await input114.setValue(await body.response_retirement_unemployment_114);  //respuesta 113
+                  await browser.pause(3000);
+                }
+                if (await body.millitary_forces_police_115 === true) {
+                  await browser.pause(3000);
+                  const input116 = await browser.$('input[id="cs_id_116"]')
+                  await browser.pause(3000);
+                  await input116.clearValue()
+                  await input116.setValue(body.response_millitary_forces_police_116);  //respuesta 115
+                  await browser.pause(3000);
+                }
+                if (await body.income_public_university_119 === true) {
+                  await browser.pause(3000);
+                  const input120 = await browser.$('input[id="cs_id_120"]')
+                  await browser.pause(3000);
+                  await input120.clearValue()
+                  await input120.setValue(body.response_income_public_university_120);  //respuesta 119
+                  await browser.pause(3000);
+                }
+                if (await body.work_rental_income_125 === true) {
+                  await browser.pause(3000);
+                  const input126 = await browser.$('input[id="cs_id_126"]')
+                  await browser.pause(3000);
+                  await input126.clearValue()
+                  await input126.setValue(body.response_work_rental_income_126);  //respuesta 125
+                  await browser.pause(3000);
+                }
+                if (await body.not_work_rental_income_129 === true) {
+                  await browser.pause(3000);
+                  const input130 = await browser.$('input[id="cs_id_130"]')
+                  await browser.pause(3000);
+                  await input130.clearValue()
+                  await input130.setValue(body.response_not_work_rental_income_130);  //respuesta 129
+                  await browser.pause(3000);
+                }
               }
 
               /* Patrimonio */

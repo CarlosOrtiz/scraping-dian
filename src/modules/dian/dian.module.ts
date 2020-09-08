@@ -20,7 +20,7 @@ import 'dotenv/config';
       },
       limiter: {
         max: 1,
-        duration: 1000,
+        duration: 35000,
         bounceBack: true
       },
       redis: {
