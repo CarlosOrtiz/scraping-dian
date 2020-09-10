@@ -20,8 +20,13 @@ const path = require('path');
 const util = require('util');
 const fs = require('fs')
 const { readdir, stat } = require("fs").promises
-const rutica = path.join(__dirname, '../../../../../../../Descargas/');
+const rutica = path.join(__dirname, '../../../../../../../Test');
+const moment = require("moment");
+const puppeteer = require('puppeteer')
+const { promisify } = require('util')
 
+const readFileAsync = promisify(fs.readFile)
+const writeFileAsync = promisify(fs.writeFile);
 @Injectable()
 export class DianService {
 
@@ -50,99 +55,59 @@ export class DianService {
   }
 
   async downloadExogenous(document: string, password: string) {
-    return await this.dianQueue.add('downloadExogenous', { document, password }, { priority: 3 });
+    return await this.dianQueue.add('downloadExogenous', { document, password }, { priority: 3, removeOnComplete: true, removeOnFail: true });
   }
 
   async downloadExogenousRut(document: string, password: string) {
-    return await this.dianQueue.add('downloadExogenousRut', { document, password }, { priority: 2 });
+    return await this.dianQueue.add('downloadExogenousRut', { document, password }, { priority: 2, removeOnComplete: true, removeOnFail: true });
 
   }
 
   async rentalDeclaration(body: RentalDeclaration) {
-    return await this.dianQueue.add('rentalDeclaration', { body }, { priority: 1 })
+    await this.dianQueue.add('rentalDeclaration', { body }, { priority: 1, removeOnComplete: true, removeOnFail: true })
   }
 
-
-  async UploadFileGDrive(file, name?) {
-    const YOUR_ROOT_FOLDER = '1D4gwvPNeCW3HFSPeoCTvknZO_4vhrgdc'; // id de mi carpeta de drive
-    const PATH_TO_CREDENTIALS = credentials;
-
-    const googleDriveInstance = new NodeGoogleDrive({
-      ROOT_FOLDER: YOUR_ROOT_FOLDER
-    });
-
-    const creds_service_user = (PATH_TO_CREDENTIALS);
-
-    let gdrive = await googleDriveInstance.useServiceAccountAuth(
-      creds_service_user
-    );
-
-    let uploadResponse = await googleDriveInstance.create({
-      source: file,
-      parentFolder: YOUR_ROOT_FOLDER,
-      name: name,
-    }).catch(e => console.error(e));
-
-    return uploadResponse
-  }
-
-
-  async moveDirsFiles(dir) {
-    const moveFrom = path.join(__dirname, '../../../../../../../Descargas/');
-    const moveTo = path.join(__dirname, '../files');
-
-    return await fs.readdir(moveFrom, function (err, files) {
-      if (err) {
-        console.error("Could not list the directory.", err);
-        process.exit(1);
-      }
-
-      files.forEach(function (file, index) {
-        // Make one pass and make the file complete
-        var fromPath = path.join(moveFrom, file);
-        var toPath = path.join(moveTo, file);
-
-        fs.stat(fromPath, function (error, stat) {
-          if (error) {
-            console.error("Error stating file.", error);
-            return;
-          }
-
-          if (stat.isFile())
-            console.log("'%s' is a file.", fromPath);
-          else if (stat.isDirectory())
-            console.log("'%s' is a directory.", fromPath);
-
-          fs.rename(fromPath, toPath, function (error) {
-            if (error) {
-              console.error("File moving error.", error);
-            }
-            else {
-              console.log("Moved file '%s' to '%s'.", fromPath, toPath);
-            }
-          });
-        });
-      });
-    });
-  }
-
-  async scanDirs(dir) {
-    return await fs.readdir(dir, (err, files) => {
-      var r = [];
-      files.forEach((file) => {
-        s(file);
-        function s(file) {
-          fs.stat(dir + '/' + file, (err, stat) => {
-            if (err) { console.error(err); return; }
-            else if (stat.isFile()) r.push({ f: file, type: 'file' });
-            else r.push(0);
-            if (r.length == files.length) {
-              r.filter((m) => { return m; });
-              console.log(r);
-            }
-          });
+  async testPupper(document: string, password: string) {
+    const imgen = '/login.png';
+    const dirFolder = path.join(__dirname, '../../../../../../../' + process.env.DOWNLOAD_PATH)
+    try {
+      const browser = await puppeteer.launch({ headless: true })
+      const page = await browser.newPage()
+      await page.goto(`${process.env.DIAN_URL_BASE}`, { waitUntil: 'networkidle2' });
+      await page._client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: dirFolder })
+      await page.select('select[name="vistaLogin:frmLogin:selNit"]', '2')
+      await page.select('select[name="vistaLogin:frmLogin:selTipoDoc"]', '13')
+      await page.type('input[name="vistaLogin:frmLogin:txtUsuario"]', document)
+      await page.type('input[name="vistaLogin:frmLogin:txtCadena"]', password)
+      let login = 'input[name="vistaLogin:frmLogin:_id18"]';
+      await page.$eval(login, elem => elem.click());
+      const urlDashboard = await page.url()
+      await page.goto(urlDashboard)
+      const itemSpam = await page.$$eval('table.tipoFilaNormalGris td span', son => {
+        return son.map(son2 => son2.innerText)
+      })
+      const reportLink = 'input[name="vistaDashboard:frmDashboard:btnConsultarRUT"]';
+      await page.$eval(reportLink, elem => elem.click());
+      const openMenuExogenous = 'input[id="vistaDashboard:frmDashboard:btnExogena"';
+      await page.$eval(openMenuExogenous, elem => elem.click());
+      const acceptButton = 'input[name="vistaDashboard:frmDashboard:btnBuscar"]';
+      await page.$eval(acceptButton, elem => elem.click());
+      await page.select('select[name="vistaDashboard:frmDashboard:anioSel"]', '2019')
+      const queryButton = 'input[name="vistaDashboard:frmDashboard:btnExogenaGenerar"]';
+      await page.$eval(queryButton, elem => elem.click());
+      const cerrar = 'input[name="vistaEncabezado:frmCabeceraUsuario:_id29"]';
+      await page.$eval(cerrar, elem => elem.click());
+      await page.screenshot({ path: rutica + imgen })
+      await page.close();
+      await browser.close();
+      return {
+        succes: 'OK', user: {
+          document: document,
+          name: itemSpam[2]
         }
-      });
-    });
+      }
+    } catch (err) {
+      console.error(err)
+    }
   }
 }

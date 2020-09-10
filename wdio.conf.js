@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-global.downloadDir = path.join(__dirname, 'tempDownload');
+global.downloadDir = path.join(__dirname, '../../../Escritorio');
 
 function rmdir(dir) {
     var list = fs.readdirSync(dir);
@@ -80,12 +80,12 @@ exports.config = {
         //
         browserName: 'chrome',
         'goog:chromeOptions': {
-            args: ['-incognito',  /* '--headless',*/, '--silent', /* '--disable-gpu' */],
+            args: ['-incognito', '--headless', '--silent', '--disable-gpu'],
         },
         prefs: {
             'directory_upgrade': true,
             'prompt_for_download': false,
-            'default_directory': __dirname
+            'default_directory': downloadDir
         },
         acceptInsecureCerts: true,
     },
@@ -127,11 +127,11 @@ exports.config = {
     baseUrl: 'https://localhost',
     //
     // Default timeout for all waitFor* commands.
-    waitforTimeout: 300000,
+    waitforTimeout: 150000,
     //
     // Default timeout in milliseconds for request
     // if browser driver or grid doesn't send response
-    connectionRetryTimeout: 300000,
+    connectionRetryTimeout: 150000,
     //
     // Default request retries count
     connectionRetryCount: 3,
@@ -196,7 +196,7 @@ exports.config = {
         // TypeScript setup
         require: ['ts-node/register'],
         ui: 'bdd',
-        timeout: 300000
+        timeout: 150000
     },
 
     /*    onPrepare: function (config, capabilities) {

@@ -26,7 +26,7 @@ export class DianController {
 
   @Post('/download/rut')
   async downloadRutPost(@Body() body: ExogenousRut) {
-    return this.dianService.downloadRut(body.document, body.password);
+    return this.dianService.testPupper(body.document, body.password);
   }
 
   @Post('/download/exogenous')
