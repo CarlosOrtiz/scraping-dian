@@ -20,13 +20,13 @@ export class DianController {
   }
 
   @Get('/download/rut-exogenous')
-  async downloadRutExogenous(@Query('document') document: string, @Query('password') password: string) {
-    return this.dianService.downloadExogenousRut(document, password);
+  async downloadRutExogenous(@Query('document') document: string, @Query('password') password: string, @Query('uid') uid: string) {
+    return this.dianService.downloadExogenousRut(document, password, uid);
   }
 
   @Post('/download/rut')
   async downloadRutPost(@Body() body: ExogenousRut) {
-    return this.dianService.testPupper(body.document, body.password);
+    return this.dianService.downloadRut(body.document, body.password);
   }
 
   @Post('/download/exogenous')
@@ -36,7 +36,7 @@ export class DianController {
 
   @Post('/download/rut-exogenous')
   async downloadRutExogenousPost(@Body() body: ExogenousRut) {
-    return this.dianService.downloadExogenousRut(body.document, body.password);
+    return this.dianService.downloadExogenousRut(body.document, body.password, body.uid);
   }
 
   @Post('/rental-declaration')

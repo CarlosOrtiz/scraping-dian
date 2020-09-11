@@ -8,4 +8,7 @@ export class ExogenousRut {
   @IsString()
   password: string;
 
+  @IsString()
+  uid: string;
+
 }

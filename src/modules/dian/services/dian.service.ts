@@ -1,44 +1,24 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { ExogenousRut } from '../dto/exogenousRut.dto';
-
-import { config } from '../../../../wdio.conf';
-import { remote } from 'webdriverio';
-import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Audit } from '../../../entities/security/audit.entity';
 import { InjectQueue } from '@nestjs/bull';
+import { Repository } from 'typeorm';
 import { Queue } from 'bull';
+import { ExogenousRut } from '../dto/exogenousRut.dto';
+import { Audit } from '../../../entities/security/audit.entity';
 import { RentalDeclaration } from '../dto/rentalDeclaration.dto';
-import { onErrorResumeNext } from 'rxjs';
-import { join } from 'path';
-import { lstatSync, readdirSync, statSync } from 'fs';
-import { error } from 'console';
-import { type } from 'os';
-const fse = require("fs-extra");
-const NodeGoogleDrive = require('node-google-drive-new');
-const credentials = require('../../../../proxy-google-drive.json');
-const bufferFrom = require('buffer-from');
+
 const path = require('path');
-const util = require('util');
-const fs = require('fs')
-const { readdir, stat } = require("fs").promises
-const rutica = path.join(__dirname, '../../../../../../../Test');
-const moment = require("moment");
-const puppeteer = require('puppeteer')
-const { promisify } = require('util')
-
-const readFileAsync = promisify(fs.readFile)
-const writeFileAsync = promisify(fs.writeFile);
-const chalk = require('chalk');
-const select = require('puppeteer-select');
-
 const loginPage = {
-  typeUser: 'select[name="vistaLogin:frmLogin:selNit2"]',
+  typeUser: 'select[name="vistaLogin:frmLogin:selNit"]',
   typeDocument: 'select[name="vistaLogin:frmLogin:selTipoDoc"]',
   numberDocument: 'input[name="vistaLogin:frmLogin:txtUsuario"]',
   password: 'input[name="vistaLogin:frmLogin:txtCadena"]',
   buttonLogin: 'input[name="vistaLogin:frmLogin:_id18"]'
 }
+
+const puppeteer = require('puppeteer')
+const fs = require('fs')
+const chalk = require('chalk');
 
 @Injectable()
 export class DianService {
@@ -49,117 +29,24 @@ export class DianService {
   ) { }
 
   async downloadRut(document: string, password: string) {
-    const job = await this.dianQueue.add('downloadRut', { document, password }, { priority: 4 });
-
-    /*   if (job) {
-        const arraDIr = await this.scanDirs(rutica)
-        let dirDocument = path.join(__dirname, '../../../../../../../Descargas/', '14659862170 (4).pdf');
-        console.log(arraDIr) */
-    /*  arraDIr.map(item => {
-       console.log(item);
-     }) */
-    /* const fileUpload = await this.UploadFileGDrive(dirDocument); */
-    /*    dirDocument = path.join(__dirname, '../../../../../../../Descargas/', '14659862170.pdf'); */
-
-
-    /*  return { success: 'OK', url: `https://drive.google.com/file/d/${fileUpload.id}/view?usp=sharing` } 
-   }*/
-
+    return { WARNING: 'SERVICE_NOT_AVAILABLE', DETAIL: 'Servicio no disponible por el momento.' }
   }
 
   async downloadExogenous(document: string, password: string) {
-    return await this.dianQueue.add('downloadExogenous', { document, password }, { priority: 3, removeOnComplete: true, removeOnFail: true });
+    return { WARNING: 'SERVICE_NOT_AVAILABLE', DETAIL: 'Servicio no disponible por el momento.' }
   }
 
-  async downloadExogenousRut(document: string, password: string) {
-    return await this.dianQueue.add('downloadExogenousRut', { document, password }, { priority: 2, removeOnComplete: true, removeOnFail: true });
+  async downloadExogenousRut(document: string, password: string, uid: string) {
+    const dirFolder = path.join(__dirname, '../../../../../../../' + process.env.DOWNLOAD_PATH)
+    const fileDirExo = path.join(dirFolder, '/reporte.xls');
+    const newNameExo = path.join(dirFolder, `/${uid}.xls`);
 
+    const job = await this.dianQueue.add('downloadExogenousRut', { loginPage, document, password, dirFolder, fileDirExo, newNameExo, uid }, { priority: 2, removeOnComplete: true, removeOnFail: true });
+    return job.finished();
   }
 
   async rentalDeclaration(body: RentalDeclaration) {
     await this.dianQueue.add('rentalDeclaration', { body }, { priority: 1, removeOnComplete: true, removeOnFail: true })
-  }
-
-
-  async testPupper(document: string, password: string) {
-    const dirFolder = path.join(__dirname, '../../../../../../../' + process.env.DOWNLOAD_PATH)
-    const fileDirExo = path.join(dirFolder, '/reporte.xls');
-    const newNameExo = path.join(dirFolder, `/${document}.xls`);
-    try {
-      const browser = await puppeteer.launch({ headless: false })
-      const page = await browser.newPage()
-      await page.waitFor(5000);
-      await page.setDefaultNavigationTimeout(120000);
-      await page.goto(`${process.env.DIAN_URL_BASE}`, { waitUntil: 'networkidle2' });
-      await page._client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: dirFolder })
-      console.log('\n%s URL ✅', chalk.bold.yellow('SUCCESS'));
-
-      await page.waitForSelector(loginPage.typeUser);
-      await page.select(loginPage.typeUser, '2');
-      await page.select(loginPage.typeDocument, '13')
-      await page.type(loginPage.numberDocument, document)
-      await page.type(loginPage.password, password)
-      await Promise.all([
-        page.waitForNavigation(),
-        page.click(loginPage.buttonLogin)
-      ]);
-
-      const urlDashboard = await page.url()
-      await page.goto(urlDashboard)
-
-      const itemSpam = await page.$$eval('table.tipoFilaNormalGris td span', son => {
-        return son.map(son2 => son2.innerText)
-      })
-      console.log('%s LOGIN ✅', chalk.bold.yellow('SUCCESS'));
-
-      const rut = 'input[name="vistaDashboard:frmDashboard:btnConsultarRUT"]';
-      await page.waitForSelector(rut);
-      await page.$eval(rut, elem => elem.click());
-      console.log('%s RUT DOWNLOAD COMPLETED ✅', chalk.bold.yellow('SUCCESS'));
-      await page.waitFor(3000);
-
-      const openMenuExogenous = 'input[name="vistaDashboard:frmDashboard:btnExogena"]';
-      await page.$eval(openMenuExogenous, elem => elem.click());
-      const acceptButton = 'input[name="vistaDashboard:frmDashboard:btnBuscar"]';
-      await page.$eval(acceptButton, elem => elem.click());
-      await page.select('select[name="vistaDashboard:frmDashboard:anioSel"]', '2019')
-      const queryButton = 'input[name="vistaDashboard:frmDashboard:btnExogenaGenerar"]';
-      await page.$eval(queryButton, elem => elem.click());
-      const cerrar = 'input[name="vistaEncabezado:frmCabeceraUsuario:_id29"]';
-      await page.$eval(cerrar, elem => elem.click());
-      await page.waitFor(3500);
-      console.log('%s INFORMATION EXOGENOUS DOWNLOAD COMPLETED ✅', chalk.bold.yellow('SUCCESS'));
-
-      await fs.renameSync(fileDirExo, newNameExo, (err) => {
-        if (err) return console.log('%s ' + err);
-      });
-      console.log(`%s NAME OF FILE reporte.xls WAS UPDATED CORRECTLY CORRECTLY TO ${document}.xls ✅`, chalk.bold.keyword('orange')('SUCCESS'));
-      await page.close();
-      await browser.close();
-      console.log('%s ENDED PROCESS ✅', chalk.bold.green('FINISHED:'));
-
-      return {
-        success: 'OK', user_data: {
-          document: document,
-          name: itemSpam[2]
-        },
-        local_path_exogenous: newNameExo
-      }
-    } catch (err) {
-      if (err.name === 'TimeoutError') {
-        console.error('%s {\n"error": "TIME_OUT_ERROR"\n"detail": "El servidor de la DIAN, superó el tiempo de espera de la solicitud o tiene una coneccion lenta"\n}', chalk.bold.red('ERROR'));
-        throw new BadRequestException({
-          error: 'TIME_OUT_ERROR',
-          detail: 'El servidor de la DIAN, superó el tiempo de espera de la solicitud o tiene una coneccion lenta'
-        });
-      } else {
-        console.error('%s ' + err.message, chalk.bold.red('ERROR'));
-        throw new BadRequestException({
-          error: err.name.toUpperCase(),
-          detail: err.message
-        });
-      }
-    }
   }
 
   async testPupper2(body: RentalDeclaration) {
@@ -167,7 +54,7 @@ export class DianService {
     const fileDirExo = path.join(dirFolder, '/reporte.xls');
     const newNameExo = path.join(dirFolder, `/${body.document}.xls`);
     try {
-      const browser = await puppeteer.launch({ headless: false })
+      const browser = await puppeteer.launch({ headless: true })
       const page = await browser.newPage()
       await page.setViewport({ width: 1300, height: 700 })
       await page.goto(`${process.env.DIAN_URL_BASE}`, { waitUntil: 'networkidle2' });

@@ -3,270 +3,111 @@ import { Logger, BadRequestException } from "@nestjs/common";
 import { Processor, Process } from "@nestjs/bull";
 import { Repository } from "typeorm";
 import { Job } from "bull";
-import { remote } from "webdriverio";
-import { config } from '../../../../wdio.conf';
 import { Audit } from "../../../entities/security/audit.entity";
-import { onErrorResumeNext } from "rxjs";
-import { response } from "express";
-const NodeGoogleDrive = require('node-google-drive-new');
-const credentials = require('../../../../proxy-google-drive.json');
-const path = require('path');
-const rutica = path.join(__dirname, '../../../../../../../Descargas/');
+
+const puppeteer = require('puppeteer')
 const fs = require('fs')
-const moment = require('moment');
+const chalk = require('chalk');
 
 @Processor('dian')
 export class RutExogenousProcessor {
 
-  private readonly logger = new Logger(this.constructor.name);
   constructor(
     @InjectRepository(Audit, 'security') private readonly auditRepository: Repository<Audit>,
   ) { }
 
   @Process({ name: 'downloadExogenousRut' })
   async downloadExogenousRut(job: Job<any>) {
-    let browser;
-    let fileExogenous;
-    let fileRut;
-    const { document, password } = job.data;
-
-    if (!document)
-      throw new BadRequestException({
-        error: 'DOCUMENT_IS_NULL',
-        detail: 'El campo de document se encuentra vacio.'
-      })
-
-    if (!password)
-      throw new BadRequestException({
-        error: 'PASSWORD_IS_NULL',
-        detail: 'El campo de password se encuentra vacio.'
-      });
-
+    let browser, page;
+    const { loginPage, document, password, dirFolder, fileDirExo, newNameExo, uid } = job.data;
     try {
-      browser = await remote(config);
-      console.log('URL ✅');
-      await browser.url(`${process.env.DIAN_URL_BASE}`);
-      /* await browser.throttle('Regular2G'); */
+      browser = await puppeteer.launch({ headless: true })
+      page = await browser.newPage();
+      await page.setDefaultNavigationTimeout(120000);
+      await page.goto(`${process.env.DIAN_URL_BASE}`, { waitUntil: 'networkidle2' });
+      await page._client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: dirFolder })
+      console.log('\n%s URL ✅', chalk.bold.yellow('SUCCESS'));
 
-      const loginForm = await browser.$('form > table[class="formulario_muisca"] > tbody > tr tr table');
-      await browser.pause(1000);
+      await page.select(loginPage.typeUser, '2');
+      await page.select(loginPage.typeDocument, '13')
+      await page.type(loginPage.numberDocument, document)
+      await page.type(loginPage.password, password)
+      await Promise.all([
+        page.waitForNavigation(),
+        page.click(loginPage.buttonLogin)
+      ]);
 
-      if (loginForm.isExisting()) {
-        await browser.pause(1000);
-        console.log('LOGIN... ✅');
-        const selectAll = await browser.$$('form > table[class="formulario_muisca"] tbody tr td select');
-        if (selectAll[0]) {
-          await selectAll[0].selectByAttribute('value', '2');   // typeUser
-          await selectAll[1].selectByAttribute('value', '13');  // typeDocument
-          await browser.pause(500);
-        } else {
-          throw new BadRequestException({
-            error: 'SELECT_NOT_FOUND',
-            detail: 'No se encontro el selector para el tipo de usuario.'
-          });
-        }
-        const credentials = await browser.$$('form > table tbody tr td input');
-        if (credentials[1]) {
-          await credentials[0].isDisplayed();           // numberDocumentOrganization
-          await credentials[1].setValue(document);      // numberDocument
-          await credentials[2].setValue(password);      // password
-          await credentials[4].doubleClick();           // buttonLogin
-          await browser.pause(500);
-        } else {
-          throw new BadRequestException({
-            error: 'INPUT_NOT_FOUND',
-            detail: 'No se encontraron las entras para la cédula y la contraseña.'
-          });
-        }
-        console.log('VALIDATE LOGIN ✅');
-        await browser.pause(500);
-        /* Open Dashboard*/
-        const dashboardForm = await browser.$$('form table input');
-        await browser.pause(500);
+      const urlDashboard = await page.url()
+      await page.goto(urlDashboard)
 
-        if (dashboardForm[12]) {
-          console.log('SUCCESSFULL LOGIN ✅');
-          console.log('DASHBOARD OPEN ✅');
+      const itemSpam = await page.$$eval('table.tipoFilaNormalGris td span', son => {
+        return son.map(son2 => son2.innerText)
+      })
+      console.log(`%s LOGIN -> ${uid} ✅`, chalk.bold.yellow('SUCCESS'));
 
-          /* await dashboardForm[12].doubleClick(); */ // download the RUT
-          const buttonRut = await browser.$('input[id="vistaDashboard:frmDashboard:btnConsultarRUT"]')
-          await buttonRut.doubleClick();// download the RUT
-          await browser.pause(10000);
+      const rut = 'input[name="vistaDashboard:frmDashboard:btnConsultarRUT"]';
+      await page.waitForSelector(rut);
+      await page.$eval(rut, elem => elem.click());
+      console.log('%s RUT DOWNLOAD COMPLETED ✅', chalk.bold.yellow('SUCCESS'));
+      await page.waitFor(3000);
 
-          let arraDIr = await this.scanDirs(rutica);
-          const dirRut = await path.join(__dirname, '../../../../../../../Descargas/', arraDIr[0])
-          fileRut = await this.UploadFileGDrive(dirRut, ('RUT-' + job.id));
-          console.log(dirRut)
-          await fs.unlinkSync(dirRut)
-          await browser.pause(5000);
+      const openMenuExogenous = 'input[name="vistaDashboard:frmDashboard:btnExogena"]';
+      await page.$eval(openMenuExogenous, elem => elem.click());
+      const acceptButton = 'input[name="vistaDashboard:frmDashboard:btnBuscar"]';
+      await page.$eval(acceptButton, elem => elem.click());
+      await page.select('select[name="vistaDashboard:frmDashboard:anioSel"]', '2019')
+      const queryButton = 'input[name="vistaDashboard:frmDashboard:btnExogenaGenerar"]';
+      await page.$eval(queryButton, elem => elem.click());
+      const cerrar = 'input[name="vistaEncabezado:frmCabeceraUsuario:_id29"]';
+      await page.$eval(cerrar, elem => elem.click());
+      await page.waitFor(3500);
+      console.log('%s INFORMATION EXOGENOUS DOWNLOAD COMPLETED ✅', chalk.bold.yellow('SUCCESS'));
 
-          console.log('RUT DOWNLOAD COMPLETED ✅');
+      await fs.renameSync(fileDirExo, newNameExo, (err) => {
+        if (err) return console.log('%s ' + err);
+      });
+      console.log(`%s NAME OF FILE reporte.xls WAS UPDATED CORRECTLY CORRECTLY TO ${document}.xls ✅`, chalk.bold.keyword('orange')('SUCCESS'));
+      await page.close();
+      await browser.close();
+      console.log('%s ENDED PROCESS ✅', chalk.bold.green('FINISHED:'));
 
-          if (dashboardForm[4].isExisting()) {
-
-            await browser.$('input[id="vistaDashboard:frmDashboard:btnExogena"]').then(item => {
-              item.doubleClick();// Open information panel
-            });
-            await browser.pause(1000);
-            /*   await dashboardForm[4].doubleClick();  */// Open information panel
-            console.log('OPEN PANEL INFORMATION EXOGENOUS ✅');
-            await browser.pause(1000);
-
-            const acceptButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnBuscar"]');
-            await acceptButton.doubleClick()
-            await browser.pause(1000);
-
-            const selectYear = await browser.$('table > tbody > tr > td > select');
-            await selectYear.selectByAttribute('value', '2019');
-            await browser.pause(1000);
-
-            const queryButton = await browser.$('input[name="vistaDashboard:frmDashboard:btnExogenaGenerar"]');
-            await queryButton.click();
-            await browser.pause(10000);
-
-            arraDIr = await this.scanDirs(rutica);
-            const dirExogenous = await path.join(__dirname, '../../../../../../../Descargas/', arraDIr[0])
-            console.log(dirExogenous)
-            const today = moment().format('YYYY-MM-DD-mm-ss');
-            fileExogenous = await this.UploadFileGDrive(dirExogenous);
-            await fs.unlinkSync(dirExogenous)
-            console.log('FILES DELETE')
-
-            console.log('CLOSE PANEL INFORMATION EXOGENOUS ✅');
-
-            /* Logout Panel */
-            console.log('LOGOUT PANEL OPENED ✅')
-            if (dashboardForm[3]) {
-              await browser.pause(1100);
-              await dashboardForm[3].doubleClick(); // button logout
-              await browser.pause(500);
-
-              console.log('ENDED PROCESS✅');
-              await browser.deleteSession();
-            } else {
-              throw new BadRequestException({
-                error: 'LOGOUT_PANEL_NOT_FOUND',
-                detail: 'El panel de cerrar session no se logro encontrar'
-              });
-            }
-
-
-          } else {
-            throw new BadRequestException({
-              error: 'PANEL_INFORMATION_EXOGENOUS_NOT_FOUND',
-              detail: 'EL panel de información exógena no se encontro.'
-            });
-          }
-        } else {
-          throw new BadRequestException({
-            error: 'INCORRECT_CREDENTIALS_LOGIN',
-            detail: 'Credenciales incorrectas para iniciar sesión'
-          });
-        }
-      } else {
-        throw new BadRequestException({
-          error: 'FORM_LOGIN_NOT_FOUND',
-          detail: 'EL formulario de la pagina del iniciar sesión no se encontro.'
-        });
+      return {
+        success: 'OK', user_data: {
+          document: document,
+          full_name: itemSpam[2]
+        },
+        local_path_exogenous: newNameExo
       }
-
     } catch (err) {
-      console.log(err)
-      if (err.response) {
-        await this.auditRepository.save({
-          name: err.response.error,
-          detail: err.response.detail,
-          user: document,
-          process: 'Descargar Rut y Información Exógena',
-          view: await browser.getUrl()
-        })
+      if (err.name === 'TimeoutError') {
+        await page.close();
+        await browser.close();
+        console.error('%s {\n"error": "TIME_OUT_ERROR"\n"detail": "El servidor de la DIAN, superó el tiempo de espera de la solicitud o tiene una coneccion lenta"\n}', chalk.bold.red('ERROR'));
+        return {
+          error: 'TIME_OUT_ERROR',
+          detail: 'El servidor de la DIAN, superó el tiempo de espera de la solicitud o tiene una coneccion lenta'
+        };
 
-        await browser.deleteSession()
-        return err.response
-      } else if (err.name == 'stale element reference') {
-        await this.auditRepository.save({
-          name: 'STALE_ELEMENT_REFERENCE',
-          detail: 'referencia de elemento obsoleto',
-          user: document,
-          process: 'Declaración de Renta-Formulario 210',
-          view: await browser.getUrl() || `${process.env.DIAN_URL_BASE}`
-        })
-        await browser.deleteSession()
-
-        return { error: 'STALE_ELEMENT_REFERENCE', detail: 'referencia de elemento obsoleto' };
-      } else if (err.name == 'Error') {
-        await browser.deleteSession()
-
-        return { error: 'NOT_INTERNET_CONECTION', detail: 'No hay conexión a internet' };
       } else {
-        await browser.deleteSession()
-        return err
+        await page.close();
+        await browser.close();
+        console.error('%s ' + err.message, chalk.bold.red('ERROR'));
+        return {
+          error: err.name.toUpperCase(),
+          detail: err.message
+        };
       }
+
     }
 
-
-    return {
-      success: 'OK',
-      url_Rut: `https://drive.google.com/file/d/${fileRut.id}/view?usp=sharing`,
-      url_Exogenous: `https://drive.google.com/file/d/${fileExogenous.id}/view?usp=sharing`
-    }
   }
 
-  async UploadFileGDrive(file, name?) {
-    const YOUR_ROOT_FOLDER = '1D4gwvPNeCW3HFSPeoCTvknZO_4vhrgdc'; // id de mi carpeta de drive
-    const PATH_TO_CREDENTIALS = credentials;
-
-    const googleDriveInstance = new NodeGoogleDrive({
-      ROOT_FOLDER: YOUR_ROOT_FOLDER
-    });
-
-    const creds_service_user = (PATH_TO_CREDENTIALS);
-
-    let gdrive = await googleDriveInstance.useServiceAccountAuth(
-      creds_service_user
-    );
-
-    let uploadResponse = await googleDriveInstance.create({
-      source: file,
-      parentFolder: YOUR_ROOT_FOLDER,
-      name: name,
-    }).catch(e => console.error(e));
-
-    return uploadResponse
-  }
-
-  async scanDirs(dir) {
-
+  async scanDirs(dir: String) {
     const response = [];
     fs.readdirSync(dir).forEach(file => {
       response.push(file)
     });
     return response;
-
-    /*  fs.readdir(dir, function (err, archivos) {
-       if (err) {
-         onErrorResumeNext(err);
-         return;
-       }
-       return archivos
-     }); */
-    /*     return await fs.readdir(dir, (err, files) => {
-          var r = [];
-          files.forEach((file) => {
-            s(file);
-            function s(file) {
-              fs.stat(dir + '/' + file, (err, stat) => {
-                if (err) { console.error(err); return; }
-                else if (stat.isFile()) r.push(file);
-                else r.push(0);
-                if (r.length == files.length) {
-                  r.filter((m) => { return m; });
-                  console.log(r);
-                }
-              });
-            }
-          });
-        }); */
   }
 
 }

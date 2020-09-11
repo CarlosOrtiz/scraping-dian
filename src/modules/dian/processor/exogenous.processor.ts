@@ -1,6 +1,6 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { Logger, BadRequestException } from "@nestjs/common";
-import { Processor, Process, OnGlobalQueueCompleted, OnGlobalQueueActive, OnGlobalQueueProgress, OnQueueActive, OnQueueProgress, InjectQueue, OnQueueCompleted } from "@nestjs/bull";
+import { Processor, Process, OnGlobalQueueCompleted, OnGlobalQueueActive, OnGlobalQueueProgress, OnQueueActive, OnQueueProgress, InjectQueue, OnQueueCompleted, OnGlobalQueueFailed, OnQueueFailed } from "@nestjs/bull";
 import { Repository } from "typeorm";
 import { Job, Queue } from "bull";
 import { remote } from "webdriverio";
@@ -175,7 +175,7 @@ export class ExogenousProcessor {
 
   @OnQueueCompleted()
   onGlobalCompleted(job: Job, result: any) {
-    console.log('On completed: job ', job.id, ' -> result: ', result);
+    console.log('Is Response: job ', job.id, ' -> data: ', result);
   }
 
   @OnQueueActive()
@@ -185,9 +185,10 @@ export class ExogenousProcessor {
     );
   }
 
-  @OnQueueProgress()
-  onProgress(job: Job, progress: number) {
-    console.log(`Job ${job.id} progress was updated to value ${progress} ...`);
+  @OnGlobalQueueFailed()
+  onGlobalQueueFailed(job: Job, err: Error) {
+    console.log(`Job ${job.id} failed with reason ${err} ...`);
+    return err
   }
 
 }
