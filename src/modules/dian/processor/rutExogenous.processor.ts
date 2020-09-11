@@ -19,13 +19,13 @@ export class RutExogenousProcessor {
   @Process({ name: 'downloadExogenousRut' })
   async downloadExogenousRut(job: Job<any>) {
     let browser, page;
-    const { loginPage, document, password, dirFolder, fileDirExo, newNameExo, uid } = job.data;
+    const { loginPage, document, password, dirFolder, fileDirExo, newNameExo, uid, auxFolder } = job.data;
     try {
-      browser = await puppeteer.launch({ headless: true })
+      browser = await puppeteer.launch({ headless: true, args: ["--disable-notifications"] })
       page = await browser.newPage();
       await page.setDefaultNavigationTimeout(120000);
       await page.goto(`${process.env.DIAN_URL_BASE}`, { waitUntil: 'networkidle2' });
-      await page._client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: dirFolder })
+      await page._client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: auxFolder })
       console.log('\n%s URL ✅', chalk.bold.yellow('SUCCESS'));
 
       await page.select(loginPage.typeUser, '2');
