@@ -38,8 +38,8 @@ export class IncomeProcessor {
       browser = await puppeteer.launch({ headless: true, args: ["--disable-notifications"] })
       page = await browser.newPage();
       await page.setDefaultNavigationTimeout(120000);
-      /*  await page.setViewport({ width: 1365, height: 740 }) */
-
+      /* await page.setViewport({ width: 1365, height: 740 })
+ */
       await page.goto(`${process.env.DIAN_URL_BASE}`, { waitUntil: 'networkidle2' });
       await page._client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: auxFolder })
       console.log('\n%s URL ✅', chalk.bold.yellow('SUCCESS'));
@@ -110,7 +110,7 @@ export class IncomeProcessor {
           await page.waitFor(2000);
 
           const oldNameIncome = path.join(auxFolder, arrayDir[1]);
-          const newNameIncome = path.join(auxFolder, `/Declaracion renta-${job.id}-${body.uid}.pdf`);
+          const newNameIncome = path.join(auxFolder, `/Declaracion-renta-${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
           pathIncome = newNameIncome;
           await fs.renameSync(oldNameIncome, newNameIncome, (err) => {
             if (err) return console.log('%s ' + err);
@@ -135,7 +135,7 @@ export class IncomeProcessor {
           await page.waitFor(2000);
 
           const oldNameIncome = path.join(auxFolder, arrayDir[1]);
-          const newNameIncome = path.join(auxFolder, `/Declaracion renta-${job.id}-${body.uid}.pdf`);
+          const newNameIncome = path.join(auxFolder, `/Declaracion-renta-${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
           pathIncome = newNameIncome;
           await fs.renameSync(oldNameIncome, newNameIncome, (err) => {
             if (err) return console.log('%s ' + err);
@@ -152,7 +152,7 @@ export class IncomeProcessor {
           await page.waitFor(2000);
 
           const oldNameIncome = path.join(auxFolder, arrayDir[1]);
-          const newNameIncome = path.join(auxFolder, `/Declaracion renta-${job.id}-${body.uid}.pdf`);
+          const newNameIncome = path.join(auxFolder, `/Declaracion-renta-${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
           pathIncome = newNameIncome;
           await fs.renameSync(oldNameIncome, newNameIncome, (err) => {
             if (err) return console.log('%s ' + err);
@@ -164,57 +164,98 @@ export class IncomeProcessor {
         await browser.close();
         console.log('%s ENDED PROCESS ✅ \n', chalk.bold.green('FINISHED:'));
 
-
         return {
           success: 'OK',
           local_path: pathIncome
         }
 
       } else if (body.year_Rental_Declaration === 2018 || body.year_Rental_Declaration === 2017) {
-        await page.goto('https://muisca.dian.gov.co/WebDilIngresoFormRenta210', { waitUntil: 'networkidle2' })
-        await page.waitFor(3000);
+        await page.goto(`https://muisca.dian.gov.co/WebFormRenta210v${body.indicative}/?concepto=inicial&anio=${body.year_Rental_Declaration}&periodicidad=anual&periodo=1`, { waitUntil: 'networkidle2' });
 
-        const buttonYear = 'body > app-root > mat-sidenav-container > mat-sidenav-content > div > ingreso > div > div > div:nth-child(2) > div > mat-card > div > div:nth-child(1) > div > div:nth-child(1) > div > button';
-        await page.$eval(buttonYear, elem => elem.click());
+        await page.waitFor(2000);
+        console.log('%s FROM DATA PROCESSING ✅', chalk.bold.cyan('INFO'));
+
+        await page.waitFor(1000);
+        const tax_resident_1 = await page.$("#mat-radio-2-input");
+        await page.waitFor(1000);
+        const box1 = await tax_resident_1.boundingBox();
+        const x1 = await box1.x + (box1.width / 2);
+        const y1 = await box1.y + (box1.height / 2);
+        await page.waitFor(2000);
+        await page.mouse.click(x1, y1);
         await page.waitFor(2000);
 
-        let isYear = 0;
-        if (body.year_Rental_Declaration === 2018) {
-          console.log('%s SELECT YEAR 2018 ✅', chalk.bold.cyan('INFO'));
-          isYear = 2;
-          const selectYear = await page.$(`#cdk-overlay-9 > div > div > button:nth-child(${isYear})`);
-          const box1 = await selectYear.boundingBox();
-          const x1 = await box1.x + (box1.width / 2);
-          const y1 = await box1.y + (box1.height / 2);
-          await page.waitFor(2000);
-          await page.mouse.click(x1, y1);
-          await page.waitFor(2000);
-        } else if (body.year_Rental_Declaration === 2017) {
-          console.log('%s SELECT YEAR 2017 ✅', chalk.bold.cyan('INFO'));
-          isYear = 3;
-          const selectYear = await page.$(`#cdk-overlay-9 > div > div > button:nth-child(${isYear})`);
-          const box1 = await selectYear.boundingBox();
-          const x1 = await box1.x + (box1.width / 2);
-          const y1 = await box1.y + (box1.height / 2);
-          await page.waitFor(2000);
-          await page.mouse.click(x1, y1);
-          await page.waitFor(2000);
+        await page.waitFor(1000);
+        const severance_pay_2016_2 = await page.$("#mat-radio-5-input");
+        await page.waitFor(1000);
+        const box2 = await severance_pay_2016_2.boundingBox();
+        const x2 = await box2.x + (box2.width / 2);
+        const y2 = await box2.y + (box2.height / 2);
+        await page.waitFor(2000);
+        await page.mouse.click(x2, y2);
+        await page.waitFor(2000);
 
+        await page.waitFor(1000);
+        const public_server_3 = await page.$("#mat-radio-8-input");
+        await page.waitFor(1000);
+        const box3 = await public_server_3.boundingBox();
+        const x3 = await box3.x + (box3.width / 2);
+        const y3 = await box3.y + (box3.height / 2);
+        await page.waitFor(2000);
+        await page.mouse.click(x3, y3);
+        await page.waitFor(2000);
+
+        await page.waitFor(1000);
+        const income_country_4 = await page.$("#mat-radio-11-input");
+        await page.waitFor(1000);
+        const box4 = await income_country_4.boundingBox();
+        const x4 = await box4.x + (box4.width / 2);
+        const y4 = await box4.y + (box4.height / 2);
+        await page.waitFor(2000);
+        await page.mouse.click(x4, y4);
+        await page.waitFor(2000);
+
+        if (await body.year_Rental_Declaration === 2018) {
+          console.log('%s YEAR 2018 ✅', chalk.bold.cyan('INFO'));
+          const searchButton = await page.$("#cdk-overlay-2 > mat-dialog-container > ng-component > mat-card > div.mat-dialog-actions > div > button");
+          await page.waitFor(1000);
+          const box5 = await searchButton.boundingBox();
+          const x5 = await box5.x + (box5.width / 2);
+          const y5 = await box5.y + (box5.height / 2);
+          await page.waitFor(2000);
+          await page.mouse.click(x5, y5);
+          await page.waitFor(2000);
         }
-        //2 -> 2018  ||  3 = 2017 //*[@id="cdk-overlay-9"]/div/div
-        /*     const buttons = await page.$x("//ul/li//button[contains(text(), 'Connect')]");
-    
-            let login_button = await page.$x('//a[contains(text(), "Login")]')
-            await login_button[0].click()
-    
-            const selectYear = `#cdk-overlay-9 > div > div > button:nth-child(${isYear})`; */
+        const searchButton = "#cdk-overlay-3 > mat-dialog-container > ng-component > mat-card > div.mat-dialog-actions > div > button";
+        await page.$eval(searchButton, elem => elem.click());
 
-        const buttonCreate = 'body > app-root > mat-sidenav-container > mat-sidenav-content > div > ingreso > div > div > div:nth-child(2) > div > mat-card > div > div:nth-child(2) > div:nth-child(2) > button'
-        await page.$eval(buttonCreate, elem => elem.click());
-        await page.waitFor(2200);
+        const buttonSave = 'body > app-root > mat-sidenav-container > mat-sidenav-content > div > app-contenedor-formulario > div > app-formulario > dspeed-dial-componente > div:nth-child(2) > a';
+        await page.$eval(buttonSave, elem => elem.click());
+        await page.waitFor(1000);
+
+        const buttonDownload = 'body > app-root > mat-sidenav-container > mat-sidenav-content > div > app-contenedor-formulario > div > app-formulario > dspeed-dial-componente > div.fixed-action-btn.click-to-toggle.active > ul > li:nth-child(1) > button'
+        await page.$eval(buttonDownload, elem => elem.click());
+        await page.waitFor(3000);
+
+        const arrayDir = await this.scanDirs(auxFolder);
+        await page.waitFor(2000);
+
+        const oldNameIncome = path.join(auxFolder, arrayDir[1]);
+        const newNameIncome = path.join(auxFolder, `/Declaracion-renta-${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
+        pathIncome = newNameIncome;
+        await fs.renameSync(oldNameIncome, newNameIncome, (err) => {
+          if (err) return console.log('%s ' + err);
+        });
+        console.log(`%s FILE DOWNLOADED AT ${newNameIncome} ✅`, chalk.bold.keyword('orange')('SUCCESS'));
 
         await page.close();
         await browser.close();
+        console.log('%s ENDED PROCESS ✅ \n', chalk.bold.green('FINISHED:'));
+
+        return {
+          success: 'OK',
+          local_path: pathIncome
+        }
 
       } else {
         await page.close();
@@ -259,6 +300,10 @@ export class IncomeProcessor {
       response.push(file)
     });
     return response;
+  }
+
+  private async formQuestionOldYear(page, body) {
+
   }
 
   private async formQuestion(page, body, moduleQuestions) {
