@@ -11,6 +11,10 @@ export class RentalDeclaration {
   @IsNotEmpty({ message: 'El campo de para la contraseña de encuentra vacio -> password' })
   password: string;
 
+  @IsString()
+  @IsNotEmpty({ message: 'El campo uid se encuetra vacio' })
+  uid: string;
+
   @IsNumber()
   @IsNotEmpty({ message: 'El campo de año de la renta se encuentra vacio.' })
   year_Rental_Declaration: number;

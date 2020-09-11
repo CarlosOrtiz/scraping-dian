@@ -43,11 +43,11 @@ export class DianController {
   async rentalDeclaration(@Body() body: RentalDeclaration) {
 
     if (body.year_Rental_Declaration === 2019 && body.indicative === 16)
-      return await this.dianService.testPupper2(body);
+      return await this.dianService.rentalDeclaration(body);
     else if (body.year_Rental_Declaration === 2018 && body.indicative === 14)
-      return await this.dianService.testPupper2(body);
+      return await this.dianService.rentalDeclaration(body);
     else if (body.year_Rental_Declaration === 2017 && body.indicative === 13)
-      return await this.dianService.testPupper2(body);
+      return await this.dianService.rentalDeclaration(body);
     else
       throw new BadRequestException({
         error: 'INDICATIVE_YEAR_NOT_FOUND',
