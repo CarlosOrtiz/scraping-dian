@@ -110,7 +110,7 @@ export class IncomeProcessor {
           await page.waitFor(2000);
 
           const oldNameIncome = path.join(auxFolder, arrayDir[1]);
-          const newNameIncome = path.join(auxFolder, `/Declaracion-renta-${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
+          const newNameIncome = path.join(auxFolder, `/Declaracion-renta ${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
           pathIncome = newNameIncome;
           await fs.renameSync(oldNameIncome, newNameIncome, (err) => {
             if (err) return console.log('%s ' + err);
@@ -135,7 +135,7 @@ export class IncomeProcessor {
           await page.waitFor(2000);
 
           const oldNameIncome = path.join(auxFolder, arrayDir[1]);
-          const newNameIncome = path.join(auxFolder, `/Declaracion-renta-${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
+          const newNameIncome = path.join(auxFolder, `/Declaracion-renta ${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
           pathIncome = newNameIncome;
           await fs.renameSync(oldNameIncome, newNameIncome, (err) => {
             if (err) return console.log('%s ' + err);
@@ -152,7 +152,7 @@ export class IncomeProcessor {
           await page.waitFor(2000);
 
           const oldNameIncome = path.join(auxFolder, arrayDir[1]);
-          const newNameIncome = path.join(auxFolder, `/Declaracion-renta-${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
+          const newNameIncome = path.join(auxFolder, `/Declaracion-renta ${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
           pathIncome = newNameIncome;
           await fs.renameSync(oldNameIncome, newNameIncome, (err) => {
             if (err) return console.log('%s ' + err);
@@ -239,9 +239,10 @@ export class IncomeProcessor {
 
         const arrayDir = await this.scanDirs(auxFolder);
         await page.waitFor(2000);
+        console.log(arrayDir)
 
-        const oldNameIncome = path.join(auxFolder, arrayDir[1]);
-        const newNameIncome = path.join(auxFolder, `/Declaracion-renta-${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
+        const oldNameIncome = path.join(auxFolder, arrayDir[0]);
+        const newNameIncome = path.join(auxFolder, `/Declaracion renta ${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
         pathIncome = newNameIncome;
         await fs.renameSync(oldNameIncome, newNameIncome, (err) => {
           if (err) return console.log('%s ' + err);
