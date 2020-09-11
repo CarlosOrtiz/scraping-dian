@@ -8,6 +8,7 @@ import { Audit } from "../../../entities/security/audit.entity";
 const puppeteer = require('puppeteer')
 const fs = require('fs')
 const chalk = require('chalk');
+const path = require('path');
 
 @Processor('dian')
 export class RutExogenousProcessor {
@@ -63,6 +64,16 @@ export class RutExogenousProcessor {
       await page.waitFor(3500);
       console.log('%s INFORMATION EXOGENOUS DOWNLOAD COMPLETED ✅', chalk.bold.yellow('SUCCESS'));
 
+      const arrayDir = await this.scanDirs(auxFolder);
+      const fileDirRut = path.join(auxFolder, arrayDir[0]);
+      const newNameRut = path.join(auxFolder, `/Rut-${job.id}${uid}.pdf`);
+      await fs.renameSync(fileDirRut, newNameRut, (err) => {
+        if (err) return console.log('%s ' + err);
+      });
+      await page.waitFor(2000);
+
+      const fileDirExo = path.join(auxFolder, '/reporte.xls');
+      const newNameExo = path.join(auxFolder, `/Informacion Exogena-${job.id}${uid}.xls`);
       await fs.renameSync(fileDirExo, newNameExo, (err) => {
         if (err) return console.log('%s ' + err);
       });
@@ -76,7 +87,7 @@ export class RutExogenousProcessor {
           document: document,
           full_name: itemSpam[2]
         },
-        local_path_exogenous: newNameExo
+        local_path_exogenous: newNameExo, local_path_rut: newNameRut,
       }
     } catch (err) {
       if (err.name === 'TimeoutError') {

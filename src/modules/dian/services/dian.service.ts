@@ -56,15 +56,13 @@ export class DianService {
   async downloadExogenousRut(document: string, password: string, uid: string) {
     const dirFolder = path.join(__dirname, '../../../../../../../' + process.env.DOWNLOAD_PATH)
     const auxFolder = path.join(dirFolder, `/${document}/`);
-    const fileDirExo = path.join(auxFolder, '/reporte.xls');
-    const newNameExo = path.join(auxFolder, `/${uid}.xls`);
 
-    const job = await this.dianQueue.add('downloadExogenousRut', { loginPage, document, password, dirFolder, fileDirExo, newNameExo, uid, auxFolder }, { priority: 2, removeOnComplete: true, removeOnFail: true });
+    const job = await this.dianQueue.add('downloadExogenousRut', { loginPage, document, password, dirFolder, uid, auxFolder }, { priority: 1, removeOnComplete: true, removeOnFail: true });
     return job.finished();
   }
 
   async rentalDeclaration(body: RentalDeclaration) {
-    await this.dianQueue.add('rentalDeclaration', { body }, { priority: 1, removeOnComplete: true, removeOnFail: true })
+    await this.dianQueue.add('rentalDeclaration', { body }, { priority: 2, removeOnComplete: true, removeOnFail: true })
   }
 
   async testPupper2(body: RentalDeclaration) {
@@ -73,10 +71,10 @@ export class DianService {
 
     let browser, page;
     try {
-      browser = await puppeteer.launch({ headless: true, args: ["--disable-notifications"] })
+      browser = await puppeteer.launch({ headless: false, args: ["--disable-notifications"] })
       page = await browser.newPage();
       await page.setDefaultNavigationTimeout(120000);
-      /*  await page.setViewport({ width: 1365, height: 740 }) */
+      await page.setViewport({ width: 1365, height: 740 })
 
       await page.goto(`${process.env.DIAN_URL_BASE}`, { waitUntil: 'networkidle2' });
       await page._client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: auxFolder })
@@ -168,7 +166,14 @@ export class DianService {
           await page.$eval(newOptionMenu, elem => elem.click());
           await page.waitFor(4000);
           const arrayDir = await this.scanDirs(auxFolder);
+          console.log(arrayDir);
           await page.waitFor(2000);
+          const fileDirExo = path.join(auxFolder, arrayDir[1]);
+          const newNameExo = path.join(auxFolder, `/Declaracion2019_${body.document}.pdf`);
+
+          await fs.renameSync(fileDirExo, newNameExo, (err) => {
+            if (err) return console.log('%s ' + err);
+          });
           console.log(`%s FILE DOWNLOADED AT ${auxFolder}${arrayDir[1]} ✅`, chalk.bold.keyword('orange')('SUCCESS'));
 
         } else if (await buttonSave.length === 4) {
@@ -192,6 +197,50 @@ export class DianService {
         }
 
       } else if (body.year_Rental_Declaration === 2018 || body.year_Rental_Declaration === 2017) {
+        await page.goto('https://muisca.dian.gov.co/WebDilIngresoFormRenta210', { waitUntil: 'networkidle2' })
+        await page.waitFor(3000);
+
+        const buttonYear = 'body > app-root > mat-sidenav-container > mat-sidenav-content > div > ingreso > div > div > div:nth-child(2) > div > mat-card > div > div:nth-child(1) > div > div:nth-child(1) > div > button';
+        await page.$eval(buttonYear, elem => elem.click());
+        await page.waitFor(2000);
+
+        let isYear = 0;
+        if (body.year_Rental_Declaration === 2018) {
+          console.log('%s SELECT YEAR 2018 ✅', chalk.bold.cyan('INFO'));
+          isYear = 2;
+          const selectYear = await page.$(`#cdk-overlay-9 > div > div > button:nth-child(${isYear})`);
+          const box1 = await selectYear.boundingBox();
+          const x1 = await box1.x + (box1.width / 2);
+          const y1 = await box1.y + (box1.height / 2);
+          await page.waitFor(2000);
+          await page.mouse.click(x1, y1);
+          await page.waitFor(2000);
+        } else if (body.year_Rental_Declaration === 2017) {
+          console.log('%s SELECT YEAR 2017 ✅', chalk.bold.cyan('INFO'));
+          isYear = 3;
+          const selectYear = await page.$(`#cdk-overlay-9 > div > div > button:nth-child(${isYear})`);
+          const box1 = await selectYear.boundingBox();
+          const x1 = await box1.x + (box1.width / 2);
+          const y1 = await box1.y + (box1.height / 2);
+          await page.waitFor(2000);
+          await page.mouse.click(x1, y1);
+          await page.waitFor(2000);
+
+        }
+        //2 -> 2018  ||  3 = 2017 //*[@id="cdk-overlay-9"]/div/div
+        /*     const buttons = await page.$x("//ul/li//button[contains(text(), 'Connect')]");
+    
+            let login_button = await page.$x('//a[contains(text(), "Login")]')
+            await login_button[0].click()
+    
+            const selectYear = `#cdk-overlay-9 > div > div > button:nth-child(${isYear})`; */
+
+        const buttonCreate = 'body > app-root > mat-sidenav-container > mat-sidenav-content > div > ingreso > div > div > div:nth-child(2) > div > mat-card > div > div:nth-child(2) > div:nth-child(2) > button'
+        await page.$eval(buttonCreate, elem => elem.click());
+        await page.waitFor(2200);
+
+        await page.close();
+        await browser.close();
 
       } else {
         await page.close();
