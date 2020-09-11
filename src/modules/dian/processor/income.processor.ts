@@ -238,7 +238,7 @@ export class IncomeProcessor {
       } else if (err.response) {
         await page.close();
         await browser.close();
-        console.error(`%s {${err.error},\n${err.detail}\n}`, chalk.bold.red('ERROR'));
+        console.error(`%s {${err.response.error},\n${err.response.detail}\n}`, chalk.bold.red('ERROR'));
         return err.response
 
       } else {

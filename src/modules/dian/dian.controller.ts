@@ -21,6 +21,24 @@ export class DianController {
 
   @Get('/download/rut-exogenous')
   async downloadRutExogenous(@Query('document') document: string, @Query('password') password: string, @Query('uid') uid: string) {
+    if (!document)
+      throw new BadRequestException({
+        error: 'DOCUMENT_IS_NULL',
+        detail: 'El campo de document se encuentra vacio.'
+      })
+
+    if (!password)
+      throw new BadRequestException({
+        error: 'PASSWORD_IS_NULL',
+        detail: 'El campo de password se encuentra vacio.'
+      });
+
+    if (!uid)
+      throw new BadRequestException({
+        error: 'UID_IS_NULL',
+        detail: 'El campo de uid se encuentra vacio.'
+      });
+
     return this.dianService.downloadExogenousRut(document, password, uid);
   }
 

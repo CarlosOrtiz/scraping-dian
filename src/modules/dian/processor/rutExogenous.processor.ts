@@ -20,7 +20,8 @@ export class RutExogenousProcessor {
   @Process({ name: 'downloadExogenousRut' })
   async downloadExogenousRut(job: Job<any>) {
     let browser, page;
-    const { loginPage, document, password, dirFolder, fileDirExo, newNameExo, uid, auxFolder } = job.data;
+    const { loginPage, document, password, dirFolder, uid, auxFolder } = job.data;
+
     try {
       browser = await puppeteer.launch({ headless: true, args: ["--disable-notifications"] })
       page = await browser.newPage();
@@ -71,13 +72,14 @@ export class RutExogenousProcessor {
         if (err) return console.log('%s ' + err);
       });
       await page.waitFor(2000);
+      console.log(`%s THE FILE RUT WAS UPDATED CORRECTLY CORRECTLY TO ${newNameRut} ✅`, chalk.bold.keyword('orange')('SUCCESS'));
 
       const fileDirExo = path.join(auxFolder, '/reporte.xls');
       const newNameExo = path.join(auxFolder, `/Informacion Exogena-${job.id}${uid}.xls`);
       await fs.renameSync(fileDirExo, newNameExo, (err) => {
         if (err) return console.log('%s ' + err);
       });
-      console.log(`%s NAME OF FILE reporte.xls WAS UPDATED CORRECTLY CORRECTLY TO ${document}.xls ✅`, chalk.bold.keyword('orange')('SUCCESS'));
+      console.log(`%s NAME OF FILE reporte.xls WAS UPDATED CORRECTLY CORRECTLY TO ${newNameExo} ✅`, chalk.bold.keyword('orange')('SUCCESS'));
       await page.close();
       await browser.close();
       console.log('%s ENDED PROCESS ✅', chalk.bold.green('FINISHED:'));
@@ -98,6 +100,12 @@ export class RutExogenousProcessor {
           error: 'TIME_OUT_ERROR',
           detail: 'El servidor de la DIAN, superó el tiempo de espera de la solicitud o tiene una coneccion lenta'
         };
+
+      } else if (err.response) {
+        await page.close();
+        await browser.close();
+        console.error('%s' + err.name, chalk.bold.red('ERROR'));
+        return err.response
 
       } else {
         await page.close();
