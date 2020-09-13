@@ -8,6 +8,12 @@ import { Audit } from '../../../entities/security/audit.entity';
 import { RentalDeclaration } from '../dto/rentalDeclaration.dto';
 
 const path = require('path');
+const puppeteer = require('puppeteer')
+const fs = require('fs')
+const chalk = require('chalk');
+const mkdirp = require('mkdirp');
+const oldmask = process.umask(0);
+
 const loginPage = {
   typeUser: 'select[name="vistaLogin:frmLogin:selNit"]',
   typeDocument: 'select[name="vistaLogin:frmLogin:selTipoDoc"]',
@@ -31,9 +37,6 @@ const moduleQuestions = {
   not_work_rental_income_129: '#mat-radio-29-input',
   response_not_work_rental_income_130: '#cs_id_130',
 }
-const puppeteer = require('puppeteer')
-const fs = require('fs')
-const chalk = require('chalk');
 
 @Injectable()
 export class DianService {
@@ -52,16 +55,31 @@ export class DianService {
   }
 
   async downloadExogenousRut(document: string, password: string, uid: string) {
-    const dirFolder = path.join(__dirname, '../../../../../../../' + process.env.DOWNLOAD_PATH)
-    const auxFolder = path.join(dirFolder, `/${document}/`);
+    const folder = path.join(__dirname, process.env.DOWNLOAD_PATH)
+    const auxFolder = path.join(folder, `/${uid}/`);
+    console.log(auxFolder);
 
-    const job = await this.dianQueue.add('downloadExogenousRut', { loginPage, document, password, dirFolder, uid, auxFolder }, { priority: 1, removeOnComplete: true, removeOnFail: true });
+    mkdirp(auxFolder, 0o777, function (err) {
+      process.umask(oldmask);
+      if (err) {
+        console.log(err)
+      }
+    });
+
+    const job = await this.dianQueue.add('downloadExogenousRut', { loginPage, document, password, uid, auxFolder }, { priority: 1, removeOnComplete: true, removeOnFail: true });
     return job.finished();
   }
 
   async rentalDeclaration(body: RentalDeclaration) {
-    const dirFolder = path.join(__dirname, '../../../../../../../' + process.env.DOWNLOAD_PATH)
-    const auxFolder = path.join(dirFolder, `/${body.document}/`);
+    const auxFolder = path.join(process.env.DOWNLOAD_PATH, `/${body.uid}/`);
+    console.log(auxFolder);
+
+    mkdirp(auxFolder, '0777', function (err) {
+      process.umask(oldmask);
+      if (err) {
+        console.log(err)
+      }
+    })
 
     const job = await this.dianQueue.add('rentalDeclaration', { auxFolder, body, moduleQuestions, loginPage }, { priority: 2, removeOnComplete: true, removeOnFail: true })
     return job.finished();

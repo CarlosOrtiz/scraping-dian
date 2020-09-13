@@ -20,8 +20,7 @@ export class RutExogenousProcessor {
   @Process({ name: 'downloadExogenousRut' })
   async downloadExogenousRut(job: Job<any>) {
     let browser, page;
-    const { loginPage, document, password, dirFolder, uid, auxFolder } = job.data;
-
+    const { loginPage, document, password, uid, auxFolder } = job.data;
     try {
       browser = await puppeteer.launch({ headless: true, args: ["--disable-notifications"] })
       page = await browser.newPage();
@@ -40,7 +39,7 @@ export class RutExogenousProcessor {
       ]);
 
       const urlDashboard = await page.url()
-      await page.goto(urlDashboard)
+      await page.goto(urlDashboard, { waitUntil: 'networkidle2' })
 
       const itemSpam = await page.$$eval('table.tipoFilaNormalGris td span', son => {
         return son.map(son2 => son2.innerText)
@@ -66,16 +65,15 @@ export class RutExogenousProcessor {
       console.log('%s INFORMATION EXOGENOUS DOWNLOAD COMPLETED ✅', chalk.bold.yellow('SUCCESS'));
 
       const arrayDir = await this.scanDirs(auxFolder);
+      console.log(arrayDir)
       const fileDirRut = path.join(auxFolder, arrayDir[0]);
-      const newNameRut = path.join(auxFolder, `/Rut-${job.id}${uid}.pdf`);
-      await fs.renameSync(fileDirRut, newNameRut, (err) => {
-        if (err) return console.log('%s ' + err);
-      });
+      const newNameRut = path.join(auxFolder, `/rut.pdf`);
+      await fs.renameSync(fileDirRut, newNameRut);
       await page.waitFor(2000);
       console.log(`%s THE FILE RUT WAS UPDATED CORRECTLY CORRECTLY TO ${newNameRut} ✅`, chalk.bold.keyword('orange')('SUCCESS'));
 
       const fileDirExo = path.join(auxFolder, '/reporte.xls');
-      const newNameExo = path.join(auxFolder, `/Informacion Exogena-${job.id}${uid}.xls`);
+      const newNameExo = path.join(auxFolder, `/exogena.xls`);
       await fs.renameSync(fileDirExo, newNameExo, (err) => {
         if (err) return console.log('%s ' + err);
       });
