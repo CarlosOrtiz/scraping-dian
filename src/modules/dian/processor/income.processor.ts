@@ -4,11 +4,14 @@ import { Processor, Process } from "@nestjs/bull";
 import { Repository } from "typeorm";
 import { Job, DoneCallback } from "bull";
 import { Audit } from "../../../entities/security/audit.entity";
+import { response } from "express";
+import { url } from "inspector";
 
 const puppeteer = require('puppeteer')
 const fs = require('fs')
 const chalk = require('chalk');
 const path = require('path');
+const axios = require('axios')
 
 @Processor('dian')
 export class IncomeProcessor {
@@ -38,8 +41,8 @@ export class IncomeProcessor {
       browser = await puppeteer.launch({ headless: true, args: ["--disable-notifications"] })
       page = await browser.newPage();
       await page.setDefaultNavigationTimeout(120000);
-      /* await page.setViewport({ width: 1365, height: 740 })
- */
+      /* await page.setViewport({ width: 1365, height: 740 }) */
+
       await page.goto(`${process.env.DIAN_URL_BASE}`, { waitUntil: 'networkidle2' });
       await page._client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: folder })
       console.log('\n%s URL ✅', chalk.bold.yellow('SUCCESS'));
@@ -55,33 +58,49 @@ export class IncomeProcessor {
 
       console.log(`%s LOGIN ✅`, chalk.bold.yellow('SUCCESS'));
 
-      if (body.year_Rental_Declaration === 2019) {
+      if (body.year_Rental_Declaration === 2019 && body.isCreate === true) {
         await page.goto(`https://muisca.dian.gov.co/WebFormRenta210v${body.indicative}/?concepto=inicial&anio=${body.year_Rental_Declaration}&periodicidad=anual&periodo=1`, { waitUntil: 'networkidle2' });
 
         await page.waitFor(2000);
         console.log('%s FROM DATA PROCESSING ✅', chalk.bold.cyan('INFO'));
 
         await page.waitFor(1000);
-        const tax_resident_1 = await page.$("#mat-radio-32-input");
+        const tax_resident_1 = await page.$("#mat-radio-32-input")
         await page.waitFor(1000);
-        const box1 = await tax_resident_1.boundingBox();
+        const box1 = await tax_resident_1.boundingBox()
         const x1 = await box1.x + (box1.width / 2);
         const y1 = await box1.y + (box1.height / 2);
         await page.waitFor(2000);
         await page.mouse.click(x1, y1);
         await page.waitFor(2000);
 
-        const searchButton = await page.$("#mat-dialog-2 > ng-component > mat-card > div.mat-dialog-actions > div > button");
+        const searchButton = await page.$("#mat-dialog-2 > ng-component > mat-card > div.mat-dialog-actions > div > button")
         await page.waitFor(1000);
-        const box2 = await searchButton.boundingBox();
+        const box2 = await searchButton.boundingBox()
         const x2 = await box2.x + (box2.width / 2);
         const y2 = await box2.y + (box2.height / 2);
         await page.waitFor(2000);
         await page.mouse.click(x2, y2);
-        await page.waitFor(2000);
+        await page.waitFor(4000);
+
+        await this.questionOne(page, body, moduleQuestions);
+        await page.waitFor(4000);
+
+        await this.questionTwo(page, body, moduleQuestions);
+        await page.waitFor(4000);
+
+        await this.questionThree(page, body, moduleQuestions);
+        await page.waitFor(4000);
+
+        await this.questionFour(page, body, moduleQuestions);
+        await page.waitFor(4000);
+
+        await this.questionFive(page, body, moduleQuestions);
+        await page.waitFor(4000);
 
         console.log('%s ADDING DATA TO THE FORM ✅', chalk.bold.cyan('INFO'));
         await this.formData(page, body);
+        await page.waitFor(2000);
 
         const panelBUttonSave = await page.$('body > app-root > mat-sidenav-container > mat-sidenav-content > div > app-contenedor-formulario > div > app-formulario > dspeed-dial-componente > div:nth-child(2) > a');
         const box8 = await panelBUttonSave.boundingBox();
@@ -120,29 +139,53 @@ export class IncomeProcessor {
 
         } else if (await buttonSave.length === 1) {
           console.log('%s SAVING DATA ✅', chalk.bold.cyan('INFO'));
+          await page.waitFor(4000);
           const buttonSave1 = 'body > app-root > mat-sidenav-container > mat-sidenav-content > div > app-contenedor-formulario > div > app-formulario > dspeed-dial-componente > div.fixed-action-btn.click-to-toggle.active > ul > li > button';
           await page.$eval(buttonSave1, elem => elem.click());
-          await page.waitFor(3000);
+          await page.waitFor(4000);
 
           const cerrar = '#mat-dialog-11 > ng-component > mat-card > div.mat-dialog-actions > button';
-          await page.$eval(cerrar, elem => elem.click());
-          await page.waitFor(2000);
+          await page.$eval(cerrar, elem => elem.click()).catch((err) => {
+            console.log('RENTAL_DECLARATION_ALREADY_CREATED ', err);
+            return { error: err, detail: 'RENTAL_DECLARATION_ALREADY_CREATED' };
+          });
+          await page.waitFor(4000);
 
           const newOptionMenu = 'body > app-root > mat-sidenav-container > mat-sidenav-content > div > app-contenedor-formulario > div > app-formulario > dspeed-dial-componente > div.fixed-action-btn.click-to-toggle.active > ul > li:nth-child(1) > button';
           await page.$eval(newOptionMenu, elem => elem.click());
-          await page.waitFor(4000);
+          await page.waitFor(4100);
 
           const arrayDir = await this.scanDirs(folder);
-          await page.waitFor(2000);
+          await page.waitFor(2200);
           console.log(folder);
 
           const oldNameIncome = path.join(folder, arrayDir[0]);
           const newNameIncome = path.join(folder, `/declaracion.pdf`);
           pathIncome = newNameIncome;
+          await page.waitFor(2200);
+
           await fs.renameSync(oldNameIncome, newNameIncome, (err) => {
             if (err) return console.log('%s ' + err);
           });
           console.log(`%s FILE DOWNLOADED AT ${newNameIncome} ✅`, chalk.bold.keyword('orange')('SUCCESS'));
+          await page.waitFor(2200);
+
+          await axios.post(body.url_response, {
+            email: body.email,
+            uid: body.uid,
+            file: newNameIncome,
+            year: body.year_Rental_Declaration.toString(),
+            url_response: body.url_response
+          })
+            .then(function (response) {
+              console.log(response.success);
+              console.log(response.status);
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+
+          console.log(`%s PETICION SEND ✅`, chalk.bold.keyword('orange')('SUCCESS'));
 
         } else if (await buttonSave.length === 4) {
           console.log('%s HAS DIGITAL FIRM ✅', chalk.bold.cyan('INFO'));
@@ -171,6 +214,7 @@ export class IncomeProcessor {
           success: 'OK',
           local_path: pathIncome
         }
+
 
       } else if (body.year_Rental_Declaration === 2018 || body.year_Rental_Declaration === 2017) {
         await page.goto(`https://muisca.dian.gov.co/WebFormRenta210v${body.indicative}/?concepto=inicial&anio=${body.year_Rental_Declaration}&periodicidad=anual&periodo=1`, { waitUntil: 'networkidle2' });
@@ -262,19 +306,20 @@ export class IncomeProcessor {
         }
 
       } else {
-        await page.close();
-        await browser.close();
-        console.log('%s YEAR_NOT_FOUND ✅ \n', chalk.bold.red('ERROR'));
         throw new BadRequestException({
-          error: 'YEAR_NOT_FOUND',
-          detail: 'No se logro encontrar el año'
+          error: 'RENTAL_DECLARATION_ALREADY_CREATED',
+          detail: 'La declaración de la renta ya esta creada.'
         });
       }
+
+
     } catch (err) {
       if (err.name === 'TimeoutError') {
         await page.close();
         await browser.close();
         console.error('%s {\n"error": "TIME_OUT_ERROR"\n"detail": "El servidor de la DIAN, superó el tiempo de espera de la solicitud o tiene una coneccion lenta"\n}', chalk.bold.red('ERROR'));
+        await job.retry();
+
         return {
           error: 'TIME_OUT_ERROR',
           detail: 'El servidor de la DIAN, superó el tiempo de espera de la solicitud o tiene una coneccion lenta'
@@ -284,12 +329,16 @@ export class IncomeProcessor {
         await page.close();
         await browser.close();
         console.error(`%s {${err.response.error},\n${err.response.detail}\n}`, chalk.bold.red('ERROR'));
+        await job.retry();
+
         return err.response
 
       } else {
         await page.close();
         await browser.close();
         console.error('%s ' + err.message, chalk.bold.red('ERROR'));
+        await job.retry();
+
         return {
           error: err.name.toUpperCase(),
           detail: err.message
@@ -447,6 +496,105 @@ export class IncomeProcessor {
     } while (flag5);
   }
 
+  private async questionOne(page, body, moduleQuestions) {
+    await page.waitFor(2000);
+    if (body.retirement_unemployment_113 === true) {
+      const retirement_unemployment_113 = await page.$(moduleQuestions.retirement_unemployment_113);
+      await page.waitForSelector(moduleQuestions.retirement_unemployment_113);
+      await page.waitFor(3000);
+      const box3 = await retirement_unemployment_113.boundingBox();
+      const x3 = await box3.x + (await box3.width / 2);
+      const y3 = await box3.y + (await box3.height / 2);
+      await page.waitFor(5000);
+      await page.mouse.click(x3, y3);
+      await page.waitFor(5000);
+      if (retirement_unemployment_113) {
+        await page.waitForSelector(moduleQuestions.response_retirement_unemployment_114);
+        await page.type(moduleQuestions.response_retirement_unemployment_114, body.response_retirement_unemployment_114.toString(), { delay: 10 })
+        console.log(`%s 113 ✅`, chalk.bold.yellow('SUCCESS'));
+      }
+    }
+  }
+  private async questionTwo(page, body, moduleQuestions) {
+    await page.waitFor(2000);
+    if (body.millitary_forces_police_115 === true) {
+      const millitary_forces_police_115 = await page.$(moduleQuestions.millitary_forces_police_115);
+      await page.waitForSelector(moduleQuestions.millitary_forces_police_115);
+      await page.waitFor(3000);
+      const box4 = await millitary_forces_police_115.boundingBox();
+      const x4 = await box4.x + (await box4.width / 2);
+      const y4 = await box4.y + (await box4.height / 2);
+      await page.waitFor(5000);
+      await page.mouse.click(x4, y4);
+      await page.waitFor(5000);
+      console.log(millitary_forces_police_115._mainFrame);
+      if (millitary_forces_police_115) {
+        await page.waitForSelector(moduleQuestions.response_millitary_forces_police_116);
+        await page.type(moduleQuestions.response_millitary_forces_police_116, body.response_millitary_forces_police_116.toString(), { delay: 10 })
+        console.log(`%s 115 ✅`, chalk.bold.yellow('SUCCESS'));
+      }
+    }
+  }
+  private async questionThree(page, body, moduleQuestions) {
+    await page.waitFor(2000);
+    if (body.income_public_university_119 === true) {
+      const income_public_university_119 = await page.$(moduleQuestions.income_public_university_119);
+      await page.waitForSelector(moduleQuestions.income_public_university_119);
+      await page.waitFor(3000);
+      const box5 = await income_public_university_119.boundingBox();
+      const x5 = await box5.x + (await box5.width / 2);
+      const y5 = await box5.y + (await box5.height / 2);
+      await page.waitFor(5000);
+      await page.mouse.click(x5, y5);
+      await page.waitFor(5000);
+      console.log(income_public_university_119._mainFrame)
+      if (income_public_university_119) {
+        await page.waitForSelector(moduleQuestions.response_income_public_university_120);
+        await page.type(moduleQuestions.response_income_public_university_120, body.response_income_public_university_120.toString(), { delay: 10 })
+        console.log(`%s 119 ✅`, chalk.bold.yellow('SUCCESS'));
+      }
+    }
+  }
+  private async questionFour(page, body, moduleQuestions) {
+    await page.waitFor(2000);
+    if (body.work_rental_income_125 === true) {
+      const work_rental_income_125 = await page.$(moduleQuestions.work_rental_income_125);
+      await page.waitForSelector(moduleQuestions.work_rental_income_125);
+      await page.waitFor(3000);
+      const box6 = await work_rental_income_125.boundingBox();
+      const x6 = await box6.x + (await box6.width / 2);
+      const y6 = await box6.y + (await box6.height / 2);
+      await page.waitFor(5000);
+      await page.mouse.click(x6, y6);
+      await page.waitFor(5000);
+      console.log(work_rental_income_125._mainFrame);
+      if (work_rental_income_125) {
+        await page.waitForSelector(moduleQuestions.response_work_rental_income_126);
+        await page.type(moduleQuestions.response_work_rental_income_126, body.response_work_rental_income_126.toString(), { delay: 10 })
+        console.log(`%s 125 ✅`, chalk.bold.yellow('SUCCESS'));
+      }
+    }
+  }
+  private async questionFive(page, body, moduleQuestions) {
+    await page.waitFor(2000);
+    if (body.not_work_rental_income_129 === true) {
+      const not_work_rental_income_129 = await page.$(moduleQuestions.not_work_rental_income_129);
+      await page.waitForSelector(moduleQuestions.not_work_rental_income_129);
+      await page.waitFor(3000);
+      const box7 = await not_work_rental_income_129.boundingBox();
+      const x7 = await box7.x + (await box7.width / 2);
+      const y7 = await box7.y + (await box7.height / 2);
+      await page.waitFor(5000);
+      await page.mouse.click(x7, y7);
+      await page.waitFor(5000);
+      console.log(not_work_rental_income_129._mainFrame)
+      if (not_work_rental_income_129) {
+        await page.waitForSelector(moduleQuestions.response_not_work_rental_income_130);
+        await page.type(moduleQuestions.response_not_work_rental_income_130, body.response_not_work_rental_income_130.toString(), { delay: 10 })
+        console.log(`%s 129 ✅`, chalk.bold.yellow('SUCCESS'));
+      }
+    }
+  }
   private async formData(page, body) {
     await page.waitFor(1000);
     await page.type('#cs_id_28', body.patrimony_total_28.toString(), { delay: 15 })

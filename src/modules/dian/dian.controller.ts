@@ -72,7 +72,7 @@ export class DianController {
   @Post('/rental-declaration')
   async rentalDeclaration(@Body() body: RentalDeclaration) {
 
-    if (body.year_Rental_Declaration === 2019 && body.indicative === 16)
+    if (body.year_Rental_Declaration === 2019 && body.indicative === 16 && body.isCreate === true)
       return await this.dianService.rentalDeclaration(body);
     else if (body.year_Rental_Declaration === 2018 && body.indicative === 14)
       return await this.dianService.rentalDeclaration(body);
@@ -80,7 +80,7 @@ export class DianController {
       return await this.dianService.rentalDeclaration(body);
     else
       throw new BadRequestException({
-        error: 'INDICATIVE_YEAR_NOT_FOUND',
+        error: 'INDICATIVE_YEAR_NOT_FOUND OR RENTAL_DECLARATION_ALREADY_CREATED',
         detail: 'Para el año 2019 su indicativo es el 16, para el 2017 es el 14 y para el 2017 es el 13'
       });
   }

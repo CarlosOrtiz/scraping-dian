@@ -63,7 +63,7 @@ export class DianService {
       }
     });
 
-    const job = await this.dianQueue.add('downloadExogenousRut', { loginPage, document, password, uid, folder, year }, { priority: 1, removeOnComplete: true, removeOnFail: true });
+    const job = await this.dianQueue.add('downloadExogenousRut', { loginPage, document, password, uid, folder, year }, { priority: 1, removeOnComplete: true, removeOnFail: true, attempts: 3 });
     return job.finished();
   }
 
@@ -77,8 +77,8 @@ export class DianService {
       }
     })
 
-    const job = await this.dianQueue.add('rentalDeclaration', { folder, body, moduleQuestions, loginPage }, { priority: 2, removeOnComplete: true, removeOnFail: true })
-    return job.finished();
+    const job = await this.dianQueue.add('rentalDeclaration', { folder, body, moduleQuestions, loginPage }, { priority: 2, removeOnComplete: true, removeOnFail: true, attempts: 3 })
+    return job.finished()
   }
 
 }

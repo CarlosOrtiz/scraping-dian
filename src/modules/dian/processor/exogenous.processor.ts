@@ -185,8 +185,8 @@ export class ExogenousProcessor {
     );
   }
 
-  @OnGlobalQueueFailed()
-  onGlobalQueueFailed(job: Job, err: Error) {
+  @OnQueueFailed()
+  onFailed(job: Job, err: Error) {
     console.log(`Job ${job.id} failed with reason ${err} ...`);
     return err
   }

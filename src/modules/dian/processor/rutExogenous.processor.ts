@@ -73,8 +73,8 @@ export class RutExogenousProcessor {
 
       console.log(`%s THE FILE RUT WAS UPDATED CORRECTLY CORRECTLY TO ${newNameRut} ✅`, chalk.bold.keyword('orange')('SUCCESS'));
 
-      const fileDirExo = path.join(folder, '/reporte.xls');
-      const newNameExo = path.join(folder, `/exogena.xls`);
+      const fileDirExo = path.join(folder, `${year.toString()}`, '/reporte.xls');
+      const newNameExo = path.join(folder, `${year.toString()}`, `/exogena.xls`);
       await page.waitFor(2000);
       await fs.renameSync(fileDirExo, newNameExo);
       console.log(`%s NAME OF FILE reporte.xls WAS UPDATED CORRECTLY CORRECTLY TO ${newNameExo} ✅`, chalk.bold.keyword('orange')('SUCCESS'));
@@ -95,6 +95,7 @@ export class RutExogenousProcessor {
         await page.close();
         await browser.close();
         console.error('%s {\n"error": "TIME_OUT_ERROR"\n"detail": "El servidor de la DIAN, superó el tiempo de espera de la solicitud o tiene una coneccion lenta"\n}', chalk.bold.red('ERROR'));
+        await job.retry();
         return {
           error: 'TIME_OUT_ERROR',
           detail: 'El servidor de la DIAN, superó el tiempo de espera de la solicitud o tiene una coneccion lenta'
@@ -104,12 +105,14 @@ export class RutExogenousProcessor {
         await page.close();
         await browser.close();
         console.error('%s' + err.name, chalk.bold.red('ERROR'));
+        await job.retry();
         return err.response
 
       } else {
         await page.close();
         await browser.close();
         console.error('%s ' + err.message, chalk.bold.red('ERROR'));
+        await job.retry();
         return {
           error: err.name.toUpperCase(),
           detail: err.message
