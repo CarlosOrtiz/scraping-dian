@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNotEmpty, IsBoolean, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty, IsBoolean, IsNumber, IsEmail } from 'class-validator';
 
 export class RentalDeclaration {
 
@@ -14,6 +14,14 @@ export class RentalDeclaration {
   @IsString()
   @IsNotEmpty({ message: 'El campo uid se encuetra vacio' })
   uid: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'El campo url_response se encuetra vacio' })
+  url_response: string
+
+  @IsEmail()
+  @IsNotEmpty()
+  email: string
 
   @IsNumber()
   @IsNotEmpty({ message: 'El campo de año de la renta se encuentra vacio.' })

@@ -19,7 +19,7 @@ export class IncomeProcessor {
 
   @Process({ name: 'rentalDeclaration' })
   async rentalDeclaration(job: Job<any>) {
-    const { auxFolder, body, moduleQuestions, loginPage } = job.data;
+    const { folder, body, moduleQuestions, loginPage } = job.data;
     if (!body.document)
       throw new BadRequestException({
         error: 'DOCUMENT_IS_NULL',
@@ -41,7 +41,7 @@ export class IncomeProcessor {
       /* await page.setViewport({ width: 1365, height: 740 })
  */
       await page.goto(`${process.env.DIAN_URL_BASE}`, { waitUntil: 'networkidle2' });
-      await page._client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: auxFolder })
+      await page._client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: folder })
       console.log('\n%s URL ✅', chalk.bold.yellow('SUCCESS'));
 
       await page.select(loginPage.typeUser, '2');
@@ -53,7 +53,7 @@ export class IncomeProcessor {
         page.click(loginPage.buttonLogin)
       ]);
 
-      console.log(`%s LOGIN -> ${body.document} ✅`, chalk.bold.yellow('SUCCESS'));
+      console.log(`%s LOGIN ✅`, chalk.bold.yellow('SUCCESS'));
 
       if (body.year_Rental_Declaration === 2019) {
         await page.goto(`https://muisca.dian.gov.co/WebFormRenta210v${body.indicative}/?concepto=inicial&anio=${body.year_Rental_Declaration}&periodicidad=anual&periodo=1`, { waitUntil: 'networkidle2' });
@@ -106,11 +106,12 @@ export class IncomeProcessor {
           await page.$eval(buttonDownload, elem => elem.click());
           await page.waitFor(3000);
 
-          const arrayDir = await this.scanDirs(auxFolder);
+          const arrayDir = await this.scanDirs(folder);
           await page.waitFor(2000);
+          console.log(folder)
 
-          const oldNameIncome = path.join(auxFolder, arrayDir[1]);
-          const newNameIncome = path.join(auxFolder, `/Declaracion-renta ${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
+          const oldNameIncome = path.join(folder, arrayDir[0]);
+          const newNameIncome = path.join(folder, `/declaracion.pdf`);
           pathIncome = newNameIncome;
           await fs.renameSync(oldNameIncome, newNameIncome, (err) => {
             if (err) return console.log('%s ' + err);
@@ -131,11 +132,12 @@ export class IncomeProcessor {
           await page.$eval(newOptionMenu, elem => elem.click());
           await page.waitFor(4000);
 
-          const arrayDir = await this.scanDirs(auxFolder);
+          const arrayDir = await this.scanDirs(folder);
           await page.waitFor(2000);
+          console.log(folder);
 
-          const oldNameIncome = path.join(auxFolder, arrayDir[1]);
-          const newNameIncome = path.join(auxFolder, `/Declaracion-renta ${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
+          const oldNameIncome = path.join(folder, arrayDir[0]);
+          const newNameIncome = path.join(folder, `/declaracion.pdf`);
           pathIncome = newNameIncome;
           await fs.renameSync(oldNameIncome, newNameIncome, (err) => {
             if (err) return console.log('%s ' + err);
@@ -148,11 +150,12 @@ export class IncomeProcessor {
           await page.$eval(buttonDownload, elem => elem.click());
           await page.waitFor(3000);
 
-          const arrayDir = await this.scanDirs(auxFolder);
+          const arrayDir = await this.scanDirs(folder);
           await page.waitFor(2000);
+          console.log(folder)
 
-          const oldNameIncome = path.join(auxFolder, arrayDir[1]);
-          const newNameIncome = path.join(auxFolder, `/Declaracion-renta ${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
+          const oldNameIncome = path.join(folder, arrayDir[0]);
+          const newNameIncome = path.join(folder, `/declaracion.pdf`);
           pathIncome = newNameIncome;
           await fs.renameSync(oldNameIncome, newNameIncome, (err) => {
             if (err) return console.log('%s ' + err);
@@ -237,12 +240,12 @@ export class IncomeProcessor {
         await page.$eval(buttonDownload, elem => elem.click());
         await page.waitFor(3000);
 
-        const arrayDir = await this.scanDirs(auxFolder);
+        const arrayDir = await this.scanDirs(folder);
         await page.waitFor(2000);
         console.log(arrayDir)
-
-        const oldNameIncome = path.join(auxFolder, arrayDir[0]);
-        const newNameIncome = path.join(auxFolder, `/Declaracion renta ${body.year_Rental_Declaration}-${job.id}-${body.uid}.pdf`);
+        console.log(folder)
+        const oldNameIncome = path.join(folder, arrayDir[0]);
+        const newNameIncome = path.join(folder, `/declaraciona.pdf`);
         pathIncome = newNameIncome;
         await fs.renameSync(oldNameIncome, newNameIncome, (err) => {
           if (err) return console.log('%s ' + err);

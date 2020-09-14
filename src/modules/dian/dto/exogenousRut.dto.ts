@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, MaxLength, MinLength } from 'class-validator';
+import { max } from 'moment';
 
 export class ExogenousRut {
 
@@ -13,5 +14,9 @@ export class ExogenousRut {
   @IsString()
   @IsNotEmpty({ message: 'El campo uid se encuetra vacio' })
   uid: string;
+
+  @IsNumber()
+  @IsNotEmpty({ message: 'El campo "year" se encuentra vacio, para descargar la información exógena' })
+  year: number;
 
 }

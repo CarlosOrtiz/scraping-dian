@@ -54,34 +54,30 @@ export class DianService {
     return { WARNING: 'SERVICE_NOT_AVAILABLE', DETAIL: 'Servicio no disponible por el momento.' }
   }
 
-  async downloadExogenousRut(document: string, password: string, uid: string) {
-    const folder = path.join(__dirname, process.env.DOWNLOAD_PATH)
-    const auxFolder = path.join(folder, `/${uid}/`);
-    console.log(auxFolder);
-
-    mkdirp(auxFolder, 0o777, function (err) {
+  async downloadExogenousRut(document: string, password: string, uid: string, year: number) {
+    const folder = path.join(__dirname, process.env.DOWNLOAD_PATH, `/${uid}/`);
+    mkdirp(folder, 0o777, function (err) {
       process.umask(oldmask);
       if (err) {
         console.log(err)
       }
     });
 
-    const job = await this.dianQueue.add('downloadExogenousRut', { loginPage, document, password, uid, auxFolder }, { priority: 1, removeOnComplete: true, removeOnFail: true });
+    const job = await this.dianQueue.add('downloadExogenousRut', { loginPage, document, password, uid, folder, year }, { priority: 1, removeOnComplete: true, removeOnFail: true });
     return job.finished();
   }
 
   async rentalDeclaration(body: RentalDeclaration) {
-    const auxFolder = path.join(process.env.DOWNLOAD_PATH, `/${body.uid}/`);
-    console.log(auxFolder);
+    const folder = path.join(__dirname, process.env.DOWNLOAD_PATH, `/${body.uid}/`, `${body.year_Rental_Declaration.toString()}`);
 
-    mkdirp(auxFolder, '0777', function (err) {
+    mkdirp(folder, 0o777, function (err) {
       process.umask(oldmask);
       if (err) {
         console.log(err)
       }
     })
 
-    const job = await this.dianQueue.add('rentalDeclaration', { auxFolder, body, moduleQuestions, loginPage }, { priority: 2, removeOnComplete: true, removeOnFail: true })
+    const job = await this.dianQueue.add('rentalDeclaration', { folder, body, moduleQuestions, loginPage }, { priority: 2, removeOnComplete: true, removeOnFail: true })
     return job.finished();
   }
 

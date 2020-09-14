@@ -20,7 +20,7 @@ export class DianController {
   }
 
   @Get('/download/rut-exogenous')
-  async downloadRutExogenous(@Query('document') document: string, @Query('password') password: string, @Query('uid') uid: string) {
+  async downloadRutExogenous(@Query('document') document: string, @Query('password') password: string, @Query('uid') uid: string, @Query('year') year: number) {
     if (!document)
       throw new BadRequestException({
         error: 'DOCUMENT_IS_NULL',
@@ -39,7 +39,13 @@ export class DianController {
         detail: 'El campo de uid se encuentra vacio.'
       });
 
-    return this.dianService.downloadExogenousRut(document, password, uid);
+    if (year < 2015 || year > 2019)
+      throw new BadRequestException({
+        error: 'YEAR_NOT_PERMITTED',
+        detail: 'El año ingresado no es permitido.'
+      });
+
+    return this.dianService.downloadExogenousRut(document, password, uid, year);
   }
 
   @Post('/download/rut')
@@ -54,7 +60,13 @@ export class DianController {
 
   @Post('/download/rut-exogenous')
   async downloadRutExogenousPost(@Body() body: ExogenousRut) {
-    return this.dianService.downloadExogenousRut(body.document, body.password, body.uid);
+    if (body.year < 2015 || body.year > 2019)
+      throw new BadRequestException({
+        error: 'YEAR_NOT_PERMITTED',
+        detail: 'El año ingresado no es permitido.'
+      });
+
+    return this.dianService.downloadExogenousRut(body.document, body.password, body.uid, body.year);
   }
 
   @Post('/rental-declaration')
