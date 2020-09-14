@@ -55,7 +55,7 @@ export class DianService {
   }
 
   async downloadExogenousRut(document: string, password: string, uid: string, year: number) {
-    const folder = path.join(__dirname, process.env.DOWNLOAD_PATH, `/${uid}/`);
+    const folder = path.join(__dirname, process.env.DOWNLOAD_PATH, `/${uid}/`, 'other');
     mkdirp(folder, 0o777, function (err) {
       process.umask(oldmask);
       if (err) {
