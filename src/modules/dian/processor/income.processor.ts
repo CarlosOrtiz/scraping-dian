@@ -2,10 +2,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Logger, BadRequestException } from "@nestjs/common";
 import { Processor, Process } from "@nestjs/bull";
 import { Repository } from "typeorm";
-import { Job, DoneCallback } from "bull";
+import { Job } from "bull";
 import { Audit } from "../../../entities/security/audit.entity";
-import { response } from "express";
-import { url } from "inspector";
 
 const puppeteer = require('puppeteer')
 const fs = require('fs')
@@ -39,10 +37,10 @@ export class IncomeProcessor {
     const replay2 = []
 
     try {
-      browser = await puppeteer.launch({ headless: false, args: ["--disable-notifications"] })
+      browser = await puppeteer.launch({ headless: true, args: ["--disable-notifications"] })
       page = await browser.newPage();
-      await page.setDefaultNavigationTimeout(120000);
-      await page.setViewport({ width: 1365, height: 740 })
+      await page.setDefaultNavigationTimeout(240000);
+      /*  await page.setViewport({ width: 1365, height: 800 }) */
 
       await page.goto(`${process.env.DIAN_URL_BASE}`, { waitUntil: 'networkidle2' });
       await page._client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: folder })
@@ -93,7 +91,8 @@ export class IncomeProcessor {
           }
         }
         try {
-          console.log('\n%s QUESTION MODULE YES OR NOT, STARTING...', chalk.bold.yellow('SUCCESS'));
+          /*  console.log('\n%s QUESTION MODULE YES OR NOT, STARTING...', chalk.bold.yellow('SUCCESS'));
+           for (let i = 0; i < 2; i++) { *
           await this.questionOne(page, body, moduleQuestions);
           await page.waitFor(4000);
 
@@ -108,7 +107,8 @@ export class IncomeProcessor {
 
           await this.questionFive(page, body, moduleQuestions);
           await page.waitFor(4000);
-          console.log('\n%s QUESTION MODULE YES OR NOT, FINISHED ✅', chalk.bold.yellow('SUCCESS'));
+          /*  } 
+          console.log('\n%s QUESTION MODULE YES OR NOT, FINISHED ✅', chalk.bold.yellow('SUCCESS'));*/
           let buttonSave;
           try {
             await page.waitFor(2000);
@@ -268,6 +268,7 @@ export class IncomeProcessor {
             detail: 'Módulo de preguntas sí o no, no encontrado'
           }
         }
+
       } else if (body.year_Rental_Declaration === 2018 || body.year_Rental_Declaration === 2017) {
         await page.goto(`https://muisca.dian.gov.co/WebFormRenta210v${body.indicative}/?concepto=inicial&anio=${body.year_Rental_Declaration}&periodicidad=anual&periodo=1`, { waitUntil: 'networkidle2' });
 
@@ -398,7 +399,7 @@ export class IncomeProcessor {
         await page.close();
         await browser.close();
         console.error(`%s {${err.response.error},\n${err.response.detail}\n}`, chalk.bold.red('ERROR'));
-
+        await job.retry();
 
         return err.response
 
@@ -406,7 +407,7 @@ export class IncomeProcessor {
         await page.close();
         await browser.close();
         console.error('%s ' + err.message, chalk.bold.red('ERROR'));
-
+        await job.retry();
 
         return {
           error: err.name.toUpperCase(),
