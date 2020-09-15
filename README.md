@@ -23,9 +23,13 @@ https://nodejs.org/dist/v12.18.3/node-v12.18.3.pkg
 #### 3. Abril la terminal ejecutar el siguente comando en el directorio del repositorio
 
 ```bash
+#local
 npm run start:dev
+
+#producción
+npm start
 ```
-#### 4. Tener la carpeta descargas vacia, totalmente libre
+#### 4. Los archivos se guardan en la capeta dist/modules/dian/~DOWNLOAD_PATH
 
 ## Crear un archivo con la siguente extención .env para las varibles de entorno
 #### .env
@@ -39,7 +43,6 @@ En este archivo se agregan constantes globales y accesibles.
 | *PORT*	 	           | `String`  | 4200
 | *JWT_KEY*	 	         | `String`  | mega_password
 | *JWT_EXPIRE*	 	     | `String`  | 365d
-| *GCS_BUCKET*	 	     | `String`  | example-template
 | *DB_TYPE*	 	         | `String`  | postgres
 | *DB_HOST*	 	         | `String`  | ec2-3-217-87-84.compute-1.amazonaws.com
 | *DB_PORT*	 	         | `String`  | 5432
@@ -48,9 +51,7 @@ En este archivo se agregan constantes globales y accesibles.
 | *DB_PASSWORD*	 	     | `String`  | 56571f44b375abf3924765d03d6191f990c90c4d4afe16fc3dd2dbcfeeb0c2f1
 | *APP_HOST_SERVER*	 	 | `String`  | http://localhost
 | *APP_HOST_CLIENT*    | `String`  | http://localhost:3010
-| *SENDGRID_API_KEY*   | `String`  | api_key
-| *DIAN_USER*          | `String`  | 
-| *DIAN_PASSWORD*      | `String`  | 
+| *DOWNLOAD_PATH*      | `String`  | /usuarios/
 | *DIAN_URL_BASE*      | `String`  | https://muisca.dian.gov.co/WebArquitectura/DefLoginOld.faces
 | *REDIS_HOST*         | `String`  | redis-17931.c52.us-east-1-4.ec2.cloud.redislabs.com
 | *REDIS_PORT*         | `String`  | 17931
@@ -67,8 +68,6 @@ PORT=4200
 JWT_KEY=mega_password
 JWT_EXPIRE=365d
 
-GCS_BUCKET= example-template
-
 DB_TYPE=postgres
 DB_HOST=ec2-3-217-87-84.compute-1.amazonaws.com
 DB_PORT=5432
@@ -77,12 +76,9 @@ DB_USERNAME=zhkazeqqdlvxcm
 DB_PASSWORD=56571f44b375abf3924765d03d6191f990c90c4d4afe16fc3dd2dbcfeeb0c2f1
 
 APP_HOST_SERVER=http://localhost
-APP_HOST_CLIENT=http://localhost:3010
+APP_HOST_CLIENT=http://localhost:4200
 
-SENDGRID_API_KEY=api_key
-
-DIAN_USER=1117552597
-DIAN_PASSWORD=Caol9901
+DOWNLOAD_PATH=/usuarios/
 DIAN_URL_BASE=https://muisca.dian.gov.co/WebArquitectura/DefLoginOld.faces
 
 REDIS_HOST=redis-17931.c52.us-east-1-4.ec2.cloud.redislabs.com
