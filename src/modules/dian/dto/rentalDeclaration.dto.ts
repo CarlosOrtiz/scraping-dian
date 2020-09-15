@@ -31,9 +31,6 @@ export class RentalDeclaration {
   @IsNotEmpty({ message: `El indicativo se encuentra vacio` })
   indicative: number;
 
-  @IsBoolean()
-  isCreate: boolean;
-
   /* Pregunta Inicar Modal */
   @IsBoolean()
   tax_resident_1: boolean;

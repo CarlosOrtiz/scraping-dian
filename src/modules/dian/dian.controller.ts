@@ -72,7 +72,7 @@ export class DianController {
   @Post('/rental-declaration')
   async rentalDeclaration(@Body() body: RentalDeclaration) {
 
-    if (body.year_Rental_Declaration === 2019 && body.indicative === 16 && body.isCreate === true)
+    if (body.year_Rental_Declaration === 2019 && body.indicative === 16)
       return await this.dianService.rentalDeclaration(body);
     else if (body.year_Rental_Declaration === 2018 && body.indicative === 14)
       return await this.dianService.rentalDeclaration(body);
