@@ -55,7 +55,7 @@ export class DianService {
   }
 
   async downloadExogenousRut(document: string, password: string, uid: string, year: number) {
-    const folder = path.join(__dirname, process.env.DOWNLOAD_PATH, `/${uid}/`, 'other');
+    const folder = path.join(process.env.DOWNLOAD_PATH, `/${uid}/`, 'other');
     mkdirp(folder, 0o777, function (err) {
       process.umask(oldmask);
       if (err) {
@@ -68,7 +68,7 @@ export class DianService {
   }
 
   async rentalDeclaration(body: RentalDeclaration) {
-    const folder = path.join(__dirname, process.env.DOWNLOAD_PATH, `/${body.uid}/`, `${body.year_Rental_Declaration.toString()}`);
+    const folder = path.join(process.env.DOWNLOAD_PATH, `/${body.uid}/`, `${body.year_Rental_Declaration.toString()}`);
 
     mkdirp(folder, 0o777, function (err) {
       process.umask(oldmask);
