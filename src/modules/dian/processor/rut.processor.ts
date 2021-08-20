@@ -5,9 +5,6 @@ import { Repository } from "typeorm";
 import { Job } from "bull";
 import { Audit } from "../../../entities/security/audit.entity";
 
-const fs = require('fs')
-const axios = require('axios')
-
 @Processor('dian')
 export class RutProcessor {
   private readonly logger = new Logger(this.constructor.name);
@@ -17,7 +14,7 @@ export class RutProcessor {
 
   @Process({ name: 'downloadRut' })
   async downloadRut(job: Job<any>) {
-    let browser;
+    let browser = {};
     const { document, password } = job.data;
 
     if (!document)
