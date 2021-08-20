@@ -37,15 +37,15 @@ export class RentalDeclaration {
 
   @IsBoolean()
   @IsOptional()
-  severance_pay_2016_2: Boolean;
+  severance_pay_2016_2: boolean;
 
   @IsBoolean()
   @IsOptional()
-  public_server_3: Boolean;
+  public_server_3: boolean;
 
   @IsBoolean()
   @IsOptional()
-  income_country_4: Boolean;
+  income_country_4: boolean;
 
   /* Datos Declarante */
   @IsNumber()
@@ -107,7 +107,7 @@ export class RentalDeclaration {
 
   @IsNumber()
   @IsOptional()
-  response_millitary_forces_police_116: Number;   //*
+  response_millitary_forces_police_116: number;   //*
 
   @IsBoolean()
   @IsOptional()
@@ -115,7 +115,7 @@ export class RentalDeclaration {
 
   @IsNumber()
   @IsOptional()
-  response_compensation_insurance_118: Number; //*
+  response_compensation_insurance_118: number; //*
 
   @IsBoolean()
   @IsOptional()
@@ -522,7 +522,7 @@ export class RentalDeclaration {
 
   @IsBoolean()
   @IsOptional()
-  disclaimer_994: Boolean;
+  disclaimer_994: boolean;
 
   /*  Pago total*/
   @IsNumber()

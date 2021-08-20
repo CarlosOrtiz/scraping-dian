@@ -1,5 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, MaxLength, MinLength } from 'class-validator';
-import { max } from 'moment';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class ExogenousRut {
 

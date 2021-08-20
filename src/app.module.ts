@@ -11,7 +11,6 @@ import typeormConfig from './@common/config/typeorm.config';
 import dianConfig from './@common/config/dian.config';
 import redisConfig from './@common/config/redis.config';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({

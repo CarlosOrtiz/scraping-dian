@@ -1,17 +1,13 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Repository } from 'typeorm';
 import { Queue } from 'bull';
-import { ExogenousRut } from '../dto/exogenousRut.dto';
 import { Audit } from '../../../entities/security/audit.entity';
 import { RentalDeclaration } from '../dto/rentalDeclaration.dto';
 
-const path = require('path');
-const puppeteer = require('puppeteer')
-const fs = require('fs')
-const chalk = require('chalk');
-const mkdirp = require('mkdirp');
+import path = require('path');
+import mkdirp = require('mkdirp');
 const oldmask = process.umask(0);
 
 const loginPage = {
@@ -22,20 +18,20 @@ const loginPage = {
   buttonLogin: 'input[name="vistaLogin:frmLogin:_id18"]'
 }
 const moduleQuestions = {
-  retirement_unemployment_113: '#mat-radio-5-input',
-  response_retirement_unemployment_114: '#cs_id_114',
+  "retirement_unemployment_113": '#mat-radio-5-input',
+  "response_retirement_unemployment_114": '#cs_id_114',
 
-  millitary_forces_police_115: '#mat-radio-8-input',
-  response_millitary_forces_police_116: '#cs_id_116',
+  "millitary_forces_police_115": '#mat-radio-8-input',
+  "response_millitary_forces_police_116": '#cs_id_116',
 
-  income_public_university_119: '#mat-radio-14-input',
-  response_income_public_university_120: '#cs_id_120',
+  "income_public_university_119": '#mat-radio-14-input',
+  "response_income_public_university_120": '#cs_id_120',
 
-  work_rental_income_125: '#mat-radio-23-input',
-  response_work_rental_income_126: '#cs_id_126',
+  "work_rental_income_125": '#mat-radio-23-input',
+  "response_work_rental_income_126": '#cs_id_126',
 
-  not_work_rental_income_129: '#mat-radio-29-input',
-  response_not_work_rental_income_130: '#cs_id_130',
+  "not_work_rental_income_129": '#mat-radio-29-input',
+  "response_not_work_rental_income_130": '#cs_id_130',
 }
 
 @Injectable()
@@ -47,16 +43,16 @@ export class DianService {
   ) { }
 
   async downloadRut(document: string, password: string) {
-    return { WARNING: 'SERVICE_NOT_AVAILABLE', DETAIL: 'Servicio no disponible por el momento.' }
+    return { WARNING: 'SERVICE_NOT_AVAILABLE', DETAIL: `Servicio no disponible por el momento. ${document}${password}` }
   }
 
   async downloadExogenous(document: string, password: string) {
-    return { WARNING: 'SERVICE_NOT_AVAILABLE', DETAIL: 'Servicio no disponible por el momento.' }
+    return { WARNING: 'SERVICE_NOT_AVAILABLE', DETAIL: `Servicio no disponible por el momento. ${document}${password}` }
   }
 
   async downloadExogenousRut(document: string, password: string, uid: string, year: number) {
     const folder = path.join(process.env.DOWNLOAD_PATH, `/${uid}/`, 'other');
-    mkdirp(folder, 0o777, function (err) {
+    mkdirp.sync(folder, 0o777, function (err: any) {
       process.umask(oldmask);
       if (err) {
         console.log(err)
@@ -69,8 +65,7 @@ export class DianService {
 
   async rentalDeclaration(body: RentalDeclaration) {
     const folder = path.join(process.env.DOWNLOAD_PATH, `/${body.uid}/`, `${body.year_Rental_Declaration.toString()}`);
-
-    mkdirp(folder, 0o777, function (err) {
+    mkdirp.sync(folder, 0o777, function (err: any) {
       process.umask(oldmask);
       if (err) {
         console.log(err)

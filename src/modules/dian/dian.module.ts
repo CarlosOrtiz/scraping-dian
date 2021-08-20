@@ -1,14 +1,14 @@
+import 'dotenv/config';
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { DianController } from './dian.controller';
 import { DianService } from './services/dian.service';
-import { Audit } from '../../entities/security/audit.entity';
-import { ExogenousProcessor } from './processor/exogenous.processor';
-import { IncomeProcessor } from './processor/income.processor';
 import { RutProcessor } from './processor/rut.processor';
+import { Audit } from '../../entities/security/audit.entity';
+import { IncomeProcessor } from './processor/income.processor';
+import { ExogenousProcessor } from './processor/exogenous.processor';
 import { RutExogenousProcessor } from './processor/rutExogenous.processor';
-import 'dotenv/config';
 
 @Module({
   imports: [

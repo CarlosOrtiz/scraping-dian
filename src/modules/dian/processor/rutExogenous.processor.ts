@@ -4,10 +4,10 @@ import { Repository } from "typeorm";
 import { Job } from "bull";
 import { Audit } from "../../../entities/security/audit.entity";
 
-const puppeteer = require('puppeteer')
-const fs = require('fs')
-const chalk = require('chalk');
-const path = require('path');
+import puppeteer = require('puppeteer')
+import fs = require('fs')
+import chalk = require('chalk');
+import path = require('path');
 
 @Processor('dian')
 export class RutExogenousProcessor {
@@ -25,7 +25,8 @@ export class RutExogenousProcessor {
       browser = await puppeteer.launch({ headless: true, args: ["--disable-notifications"] })
       page = await browser.newPage();
       await page.setDefaultNavigationTimeout(120000);
-      await page.goto(`${process.env.DIAN_URL_BASE}`, { waitUntil: 'networkidle2' });
+      await page.goto(`${process.env.DIAN_URL_BASE}`, { waitUntil: 'networkidle0' });
+      await page.reload({ waitUntil: ["networkidle0", "domcontentloaded"] });
       await page._client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: folder })
       console.log('\n%s URL ✅', chalk.bold.yellow('SUCCESS'));
 
@@ -39,7 +40,7 @@ export class RutExogenousProcessor {
       ]);
 
       const urlDashboard = await page.url()
-      await page.goto(urlDashboard, { waitUntil: 'networkidle2' })
+      await page.goto(urlDashboard, { waitUntil: 'networkidle0' })
 
       const itemSpam = await page.$$eval('table.tipoFilaNormalGris td span', son => {
         return son.map(son2 => son2.innerText)
@@ -50,7 +51,7 @@ export class RutExogenousProcessor {
       await page.waitForSelector(rut);
       await page.$eval(rut, elem => elem.click());
       console.log('%s RUT DOWNLOAD COMPLETED ✅', chalk.bold.yellow('SUCCESS'));
-      await page.waitFor(3000);
+      await page.waitForTimeout(3000);
 
       const openMenuExogenous = 'input[name="vistaDashboard:frmDashboard:btnExogena"]';
       await page.$eval(openMenuExogenous, elem => elem.click());
@@ -61,7 +62,7 @@ export class RutExogenousProcessor {
       await page.$eval(queryButton, elem => elem.click());
       const cerrar = 'input[name="vistaEncabezado:frmCabeceraUsuario:_id29"]';
       await page.$eval(cerrar, elem => elem.click());
-      await page.waitFor(3500);
+      await page.waitForTimeout(3500);
       console.log('%s INFORMATION EXOGENOUS DOWNLOAD COMPLETED ✅', chalk.bold.yellow('SUCCESS'));
 
       const arrayFiles = await this.scanDirs(folder);
@@ -70,14 +71,14 @@ export class RutExogenousProcessor {
 
       newNameRut = path.join(folder, `/rut.pdf`);
       const fileDirRut = path.join(folder, arrayFiles[0]);
-      await page.waitFor(2000);
+      await page.waitForTimeout(2000);
       await fs.renameSync(fileDirRut, newNameRut);
 
       console.log(`%s THE FILE RUT WAS UPDATED CORRECTLY CORRECTLY TO ${newNameRut} ✅`, chalk.bold.keyword('orange')('SUCCESS'));
 
       const fileDirExo = path.join(folder, '/reporte.xls');
       const newNameExo = path.join(folder, `/exogena.xls`);
-      await page.waitFor(2000);
+      await page.waitForTimeout(2000);
       await fs.renameSync(fileDirExo, newNameExo);
       console.log(`%s NAME OF FILE reporte.xls WAS UPDATED CORRECTLY CORRECTLY TO ${newNameExo} ✅`, chalk.bold.keyword('orange')('SUCCESS'));
       await page.close();
@@ -85,12 +86,12 @@ export class RutExogenousProcessor {
       console.log('%s ENDED PROCESS ✅', chalk.bold.green('FINISHED:'));
 
       return {
-        success: 'OK', user_data: {
+        success: 'OK', "user_data": {
           document: document,
-          full_name: itemSpam[2],
+          "full_name": itemSpam[2],
           folder: uid
         },
-        local_path_exogenous: newNameExo, local_path_rut: newNameRut,
+        "local_path_exogenous": newNameExo, "local_path_rut": newNameRut,
       }
     } catch (err) {
       if (err.name === 'TimeoutError') {
@@ -120,12 +121,10 @@ export class RutExogenousProcessor {
           detail: err.message
         };
       }
-
     }
-
   }
 
-  async scanDirs(dir: String) {
+  async scanDirs(dir: string) {
     const response = [];
     fs.readdirSync(dir).forEach(file => {
       response.push(file)
