@@ -3,7 +3,6 @@ import { DianService } from './services/dian.service';
 import { ExogenousRut } from './dto/exogenousRut.dto';
 import { RentalDeclaration } from './dto/rentalDeclaration.dto';
 
-
 @Controller('dian')
 export class DianController {
 
